@@ -3,7 +3,7 @@
 ;;;;
 ;;;; Name:          diffie-hellman.lisp
 ;;;; Project:       the apis message-passing system
-;;;; Purpose:       an implementation of diffie-hellman sucre key exchange
+;;;; Purpose:       an implementation of diffie-hellman secure key exchange
 ;;;; Author:        mikel evins
 ;;;; Copyright:     2014 by mikel evins
 ;;;;
