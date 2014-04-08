@@ -33,7 +33,7 @@
                          (:file "diffie-hellman")
                          (:file "identifier")
                          (:file "message")
-                         (:file "protocol")
+                         (:file "envelope")
                          (:file "messenger")
                          (:file "agent")))))
 
