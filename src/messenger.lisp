@@ -117,3 +117,4 @@
 ;;; (send-message $msg1 *localhost* *message-receive-port*)
 ;;; (stop-messaging)
 ;;; (describe (messenger-receive-queue (the-messenger)))
+;;; (describe (the-messenger))
