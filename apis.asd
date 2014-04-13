@@ -12,6 +12,7 @@
 (in-package :cl-user)
 
 (require :asdf)
+#+abcl(require "abcl-contrib")
 
 ;;; ---------------------------------------------------------------------
 ;;; apis system
@@ -23,8 +24,16 @@
   :description "Apis: swarms of threads and processes passing messages"
   :author "mikel evins <mevins@me.com>"
   :license "Apache 2.0"
-  :depends-on (:uuid :entity :usocket :cl-prevalence :cl-base64 :ironclad :cl-store :queues 
-                     :queues.simple-cqueue :flexi-streams :singleton-classes)
+  :depends-on (#+abcl :jss
+		      :usocket
+		      :ironclad
+		      :uuid
+		      :cl-prevalence
+		      :cl-base64
+		      :queues 
+		      :queues.simple-cqueue
+		      :flexi-streams
+		      :singleton-classes)
   :components ((:module "src"
                         :serial t
                         :components
@@ -34,7 +43,9 @@
                          (:file "identifier")
                          (:file "message")
                          (:file "envelope")
-                         (:file "messenger")
-                         (:file "agent")))))
+                         ;;(:file "messenger")
+                         #+abcl (:file "agent-abcl")
+                         #+ccl (:file "agent-ccl")
+                         ))))
 
 ;;; (asdf:load-system :apis)

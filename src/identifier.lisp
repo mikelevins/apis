@@ -13,6 +13,7 @@
 
 ;;; this version of makeid generates a v4 uuid and converts it to 
 ;;; a 128-bit integer
+
 (defun makeid ()
   (let* ((uuid (uuid:make-v4-uuid))
          (bytes (uuid:uuid-to-byte-array uuid))
@@ -21,3 +22,5 @@
       for i from 0
       summing (ash byte (* 8 (- max-index i))) into total
       finally (return total))))
+
+;;; (time (makeid))
