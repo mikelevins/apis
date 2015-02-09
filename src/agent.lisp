@@ -4,28 +4,32 @@
 ;;;; Project:       the apis message-passing system
 ;;;; Purpose:       agent implementation for abcl
 ;;;; Author:        mikel evins
-;;;; Copyright:     2014 by mikel evins
+;;;; Copyright:     2015 by mikel evins
 ;;;;
 ;;;; ***********************************************************************
 
 (in-package #:apis)
 
+(defparameter *agent-lock* (bt:make-lock))
+
 (defclass agent ()
   ((id :reader agent-id :initform (makeid) :initarg :id)
-   (message-ready? :reader agent-message-ready? :initform (ccl:make-semaphore))
+   (message-ready? :reader agent-message-ready? :initform (bt:make-condition-variable))
    (message-queue :accessor agent-message-queue :initform (make-instance 'queues:simple-cqueue))
    (event-process :accessor agent-event-process :initform nil)))
 
 (defmethod handle-message ((agent agent) msg)
-  (format t "~%Agent ~S received message ~S" agent msg)
-  (force-output t))
+  (capi:display-message (format nil "~%Agent ~S received message ~S" agent msg)))
 
 (defmethod run-agent ((agent agent))
   (loop
-     (let ((msg (queues:qpop (agent-message-queue agent))))
-       (if msg
-           (handle-message agent msg)
-           (ccl:wait-on-semaphore (agent-message-ready? agent))))))
+   (bt:with-lock-held (*agent-lock*)
+     (loop for msg = (queues:qpop (agent-message-queue agent))
+           then (queues:qpop (agent-message-queue agent))
+           while msg
+           do (handle-message agent msg))
+     (bt:condition-wait (agent-message-ready? agent)
+                        *agent-lock*))))
 
 
 (defmethod make-agent-event-process ((agent agent))
@@ -42,8 +46,9 @@
       (bt:destroy-thread handler))))
 
 (defmethod deliver-message (msg (agent agent))
-  (queues:qpush (agent-message-queue agent) msg)
-  (ccl:signal-semaphore (agent-message-ready? agent)))
+  (bt:with-lock-held (*agent-lock*)
+    (queues:qpush (agent-message-queue agent) msg)
+    (bt:condition-notify (agent-message-ready? agent))))
 
 ;;; (defparameter $a (make-instance 'agent))
 ;;; (describe $a)

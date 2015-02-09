@@ -24,28 +24,24 @@
   :description "Apis: swarms of threads and processes passing messages"
   :author "mikel evins <mevins@me.com>"
   :license "Apache 2.0"
-  :depends-on (#+abcl :jss
-		      :usocket
-		      :ironclad
-		      :uuid
-		      :cl-prevalence
-		      :cl-base64
-		      :queues 
-		      :queues.simple-cqueue
-		      :flexi-streams
-		      :singleton-classes)
+  :depends-on (:usocket
+               :ironclad
+               :uuid
+               ;;:cl-prevalence
+               :cl-base64
+               :queues 
+               :queues.simple-cqueue
+               :flexi-streams
+               :singleton-classes)
   :components ((:module "src"
-                        :serial t
-                        :components
-                        ((:file "package")
-                         (:file "absent")
-                         (:file "diffie-hellman")
-                         (:file "identifier")
-                         (:file "message")
-                         (:file "envelope")
-                         ;;(:file "messenger")
-                         #+abcl (:file "agent-abcl")
-                         #+ccl (:file "agent-ccl")
-                         ))))
+                :serial t
+                :components ((:file "package")
+                             (:file "absent")
+                             (:file "diffie-hellman")
+                             (:file "identifier")
+                             (:file "message")
+                             (:file "envelope")
+                             (:file "agent")
+                             ))))
 
 ;;; (asdf:load-system :apis)

@@ -1,5 +1,4 @@
 ;;;; ***********************************************************************
-;;;; FILE IDENTIFICATION
 ;;;;
 ;;;; Name:          absent.lisp
 ;;;; Project:       the apis message-passing system
@@ -36,3 +35,7 @@
 
 (defun absent ()
   (make-instance 'absent))
+
+;;; (absent)
+;;; (present? (absent))
+;;; (eq (absent)(absent))

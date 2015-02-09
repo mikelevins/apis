@@ -1,5 +1,4 @@
 ;;;; ***********************************************************************
-;;;; FILE IDENTIFICATION
 ;;;;
 ;;;; Name:          diffie-hellman.lisp
 ;;;; Project:       the apis message-passing system

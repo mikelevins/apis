@@ -1,9 +1,8 @@
 ;;;; ***********************************************************************
-;;;; FILE IDENTIFICATION
 ;;;;
-;;;; Name:          agent.lisp
+;;;; Name:          agent-abcl.lisp
 ;;;; Project:       the apis message-passing system
-;;;; Purpose:       system definition
+;;;; Purpose:       agent implementation for abcl
 ;;;; Author:        mikel evins
 ;;;; Copyright:     2014 by mikel evins
 ;;;;
