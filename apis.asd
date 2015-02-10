@@ -12,7 +12,6 @@
 (in-package :cl-user)
 
 (require :asdf)
-#+abcl(require "abcl-contrib")
 
 ;;; ---------------------------------------------------------------------
 ;;; apis system
@@ -27,10 +26,10 @@
   :depends-on (:usocket
                :ironclad
                :uuid
-               ;;:cl-prevalence
                :cl-base64
                :queues 
                :queues.simple-cqueue
+               :cl-store
                :flexi-streams
                :singleton-classes)
   :components ((:module "src"
@@ -41,7 +40,6 @@
                              (:file "identifier")
                              (:file "message")
                              (:file "envelope")
-                             (:file "agent")
-                             ))))
+                             (:file "agent")))))
 
 ;;; (asdf:load-system :apis)
