@@ -35,11 +35,11 @@
   :components ((:module "src"
                 :serial t
                 :components ((:file "package")
-                             (:file "absent")
-                             (:file "diffie-hellman")
-                             (:file "identifier")
-                             (:file "message")
-                             (:file "envelope")
-                             (:file "agent")))))
+                             (:file "data-absent")
+                             (:file "algo-diffie-hellman")
+                             (:file "data-identifier")
+                             (:file "comm-message")
+                             (:file "comm-envelope")
+                             (:file "agent-common")))))
 
 ;;; (asdf:load-system :apis)

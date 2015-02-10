@@ -1,8 +1,9 @@
 ;;;; ***********************************************************************
 ;;;;
-;;;; Name:          absent.lisp
+;;;; Name:          data-absent.lisp
 ;;;; Project:       the apis message-passing system
-;;;; Purpose:       a singleton class that represents an absence of any useful value
+;;;; Purpose:       a singleton class that represents an absence of any
+;;;;                useful value
 ;;;; Author:        mikel evins
 ;;;; Copyright:     2014 by mikel evins
 ;;;;

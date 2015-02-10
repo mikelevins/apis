@@ -1,8 +1,8 @@
 ;;;; ***********************************************************************
 ;;;;
-;;;; Name:          agent.lisp
+;;;; Name:          agent-common.lisp
 ;;;; Project:       the apis message-passing system
-;;;; Purpose:       agent implementation for abcl
+;;;; Purpose:       agent implementation
 ;;;; Author:        mikel evins
 ;;;; Copyright:     2015 by mikel evins
 ;;;;
@@ -19,7 +19,7 @@
    (event-process :accessor agent-event-process :initform nil)))
 
 (defmethod handle-message ((agent agent) msg)
-  (capi:display-message (format nil "~%Agent ~S received message ~S" agent msg)))
+  (warn (format nil "~%Agent ~S received message ~S" agent msg)))
 
 (defmethod run-agent ((agent agent))
   (loop
