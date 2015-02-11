@@ -5,11 +5,10 @@ multiple processes, shared-nothing concurrency, and, optionally,
 distributed processing.
 
 Formerly, Apis was just intended to be a library for messaging between
-Lisp processes, but it stalled when I found a different development
-platform for the project I was working on that offered some
-significant prdocutvity gains.
+Lisp processes, but it stalled when I found that I didn;t need it for
+the project I was working on.
 
-I've returned to Apis for another project, and now I find it useful to
+I've returned to Apis now for another project, and now I find it useful to
 include more application infrastructure and organize the communication
 layer around local and remote IPC.
 
