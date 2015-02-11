@@ -11,28 +11,6 @@
 (in-package :cl-user)
 
 ;;; ---------------------------------------------------------------------
-;;; automatic parameters
-;;; ---------------------------------------------------------------------
-;;; Do not edit these:
-
-(let* ((path *load-truename*)
-       (project-root (make-pathname :directory (pathname-directory path))))
-  ;;; when the app is delivered, we redefine path-base to resolve
-  ;;; paths relative to the app bundle
-  (defparameter *project-root* project-root))
-
-;;; ---------------------------------------------------------------------
-;;; load configuration parameters
-;;; ---------------------------------------------------------------------
-
-;;; load config.lisp, unless it doesn;t exist
-;;; in that case, load config-template.lisp
-(eval-when (:compile-toplevel :load-toplevel :execute)
-  (if (probe-file (merge-pathnames "config.lisp" *project-root*))
-      (load (merge-pathnames "config.lisp" *project-root*))
-      (load (merge-pathnames "config-template.lisp" *project-root*))))
-
-;;; ---------------------------------------------------------------------
 ;;; locating project assets
 ;;; ---------------------------------------------------------------------
 
@@ -52,6 +30,9 @@
 (defun bundle-resource-directory ()
   (merge-pathnames "Resources/" (bundle-contents-directory)))
 
+(defun image-path ()
+  (merge-pathnames *app-name* (bundle-macos-directory)))
+
 
 ;;; ---------------------------------------------------------------------
 ;;; 
@@ -69,3 +50,5 @@
   (copy-file (merge-pathnames "icon/Apis.icns" (project-assets-directory))
              (merge-pathnames "apis.icns" (bundle-resource-directory))))
 
+(defun build-image ()
+  (save-application (image-path) :application-class 'apis::apis-application :prepend-kernel t))

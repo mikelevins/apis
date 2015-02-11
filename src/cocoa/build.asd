@@ -14,22 +14,6 @@
 (require :asdf)
 
 ;;; ---------------------------------------------------------------------
-;;; dev-time path utils
-;;; ---------------------------------------------------------------------
-
-(let* ((path *load-truename*)
-       (project-root (make-pathname :directory (pathname-directory path))))
-  ;;; when the app is delivered, we redefine path-base to resolve
-  ;;; paths relative to the app bundle
-  (defun path-base () project-root))
-
-(defun path (p)(merge-pathnames p (path-base)))
-
-(defun add-to-asdf (path)
-  (pushnew (truename (merge-pathnames path (path-base)))
-           asdf:*central-registry* :test 'equalp))
-
-;;; ---------------------------------------------------------------------
 ;;; apis system
 ;;; ---------------------------------------------------------------------
 ;;;; apis.asd
@@ -40,19 +24,22 @@
   :author "mikel evins"
   :serial t
   :components ((:file "package")
+               (:file "config")
                (:file "cocoa")
-               (:file "delegate")
+               (:file "delegate")               
                (:file "menus")
                (:file "main-menu")
                (:file "main")
-               (:file "make")))
+               (:file "build")))
 ;;; (asdf:load-system :apis)
 
 (defun load-apis ()
   (asdf::oos 'asdf:compile-op :apis)
   (asdf::oos 'asdf:load-op :apis))
 
-(defun build-apis (path)
+(defun build-apis ()
   (load-apis)
-  (build-image path))
+  (build-bundle)
+  (build-image))
 
+;;; (build-apis)
