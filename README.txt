@@ -14,7 +14,7 @@ layer around local and remote IPC.
 
 A "cocoa" subsystem is now in place that supports building a skeleton
 Cocoa application on OSX. A savvy user could probably extend it into a
-fully-function OSX GUI application.
+fully-functioning OSX GUI application.
 
 I plan to add support for similar skeleton apps on Windows and Linux
 soon.
