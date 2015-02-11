@@ -1,25 +1,34 @@
 ;;;; ***********************************************************************
 ;;;;
-;;;; Name:          build.lisp
+;;;; Name:          config-template.lisp
 ;;;; Project:       Apis: the hive application
-;;;; Purpose:       build the application 
+;;;; Purpose:       build-time parameters
 ;;;; Author:        mikel evins
-;;;; Copyright:     2014 by mikel evins
+;;;; Copyright:     2015 by mikel evins
 ;;;;
 ;;;; ***********************************************************************
+
+;;; ---------------------------------------------------------------------
+;;; ABOUT
+;;; ---------------------------------------------------------------------
+;;; edit the parameters in this file to create config.lisp, which Apis
+;;; will use for build-time configuration
 
 (in-package :cl-user)
 
 ;;; ---------------------------------------------------------------------
-;;; locating project assets
+;;; configuration parameters
 ;;; ---------------------------------------------------------------------
+;;; Edit these:
 
-(defun image-path ()
-  (merge-pathnames *app-name* *project-root*))
+(defparameter *project-root*
+  (pathname "c:/Users/mevin_000/Workshop/apis/src/windows/"))
 
-;;; ---------------------------------------------------------------------
-;;; 
-;;; ---------------------------------------------------------------------
+(defparameter *lisp-directory*
+  (pathname "C:/ccl/"))
 
-(defun build-image ()
-  (save-application (image-path) :application-class 'apis::apis-application :prepend-kernel t))
+(defparameter *lisp* "C:/ccl/wx86cl64.exe")
+
+(defparameter *app-name* "Apis")
+
+

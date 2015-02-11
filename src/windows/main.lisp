@@ -2,7 +2,7 @@
 ;;;;
 ;;;; Name:          main.lisp
 ;;;; Project:       Apis: the hive application
-;;;; Purpose:       ltk main function
+;;;; Purpose:       the main program
 ;;;; Author:        mikel evins
 ;;;; Copyright:     2009 by mikel evins
 ;;;;
@@ -21,5 +21,5 @@
 
 (defmethod toplevel-function ((app apis-application) init-file)
   (declare (ignore init-file))
-  ;; TODO: write ltk toplevel
+  ;; TODO: write windows toplevel
   )
