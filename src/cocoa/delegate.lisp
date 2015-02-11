@@ -16,6 +16,3 @@
 
 (objc:defmethod (#/applicationDidFinishLaunching: :void) ((self apis-app-delegate) notification)
   )
-
-(objc:defmethod (#/newDocument: :void) ((self apis-app-delegate) notification)
-  )
