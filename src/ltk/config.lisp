@@ -1,10 +1,10 @@
 ;;;; ***********************************************************************
 ;;;;
-;;;; Name:          config-template.lisp
+;;;; Name:          config.lisp
 ;;;; Project:       Apis: the hive application
 ;;;; Purpose:       build-time parameters
 ;;;; Author:        mikel evins
-;;;; Copyright:     2014 by mikel evins
+;;;; Copyright:     2015 by mikel evins
 ;;;;
 ;;;; ***********************************************************************
 
@@ -16,15 +16,13 @@
 ;;; Edit these:
 
 (defparameter *project-root*
-  (pathname "/Users/mikel/Workshop/programming/apis/src/cocoa/"))
+  (pathname "/home/mikel/Workshop/apis/src/ltk/"))
 
 (defparameter *lisp-directory*
-  (pathname "/usr/local/Cellar/clozure-cl/1.10/libexec/"))
+  (pathname "/usr/share/ccl"))
 
-(defparameter *lisp*
-  (merge-pathnames "dx86cl64" *lisp-directory*))
+(defparameter *lisp* "/usr/bin/ccl64")
 
 (defparameter *app-name* "Apis")
 
-(defparameter *bundle-name* (concatenate 'string *app-name* ".app"))
 
