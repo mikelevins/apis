@@ -29,7 +29,6 @@
                (:file "cocoa")
                (:file "delegate")               
                (:file "menus")
-               (:file "main-menu")
                (:file "main")
                (:file "build")))
 
