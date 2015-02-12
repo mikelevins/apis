@@ -23,14 +23,13 @@
 
 (defmethod run-agent ((agent agent))
   (loop
-   (bt:with-lock-held ((agent-lock agent))
-     (loop for msg = (queues:qpop (agent-message-queue agent))
-           then (queues:qpop (agent-message-queue agent))
-           while msg
-           do (handle-message agent msg))
-     (bt:condition-wait (agent-message-ready? agent)
-                        (agent-lock agent)))))
-
+     (bt:with-lock-held ((agent-lock agent))
+       (loop for msg = (queues:qpop (agent-message-queue agent))
+          then (queues:qpop (agent-message-queue agent))
+          while msg
+          do (handle-message agent msg))
+       (bt:condition-wait (agent-message-ready? agent)
+                          (agent-lock agent)))))
 
 (defmethod make-agent-event-process ((agent agent))
   (bt:make-thread (lambda ()(run-agent agent))

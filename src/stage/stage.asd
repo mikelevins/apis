@@ -22,6 +22,7 @@
   :author "mikel evins <mevins@me.com>"
   :license "Apache 2.0"
   :depends-on (:apis
+               :bordeaux-threads
                :singleton-classes)
   :components ((:module "src"
                         :serial t
