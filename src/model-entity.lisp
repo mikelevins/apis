@@ -60,3 +60,13 @@
               (cons key
                     (cons val properties))))))
 
+(defmethod merge-entities ((left list)(right list))
+  (assert (typep left 'entity)() "~S is not an entity" e)
+  (assert (typep right 'entity)() "~S is not an entity" e)
+  (let ((result left))
+    (loop for tail on (entity-properties right) by #'cddr
+       do (let ((key (car tail))
+                (val (cadr tail)))
+            (setf result
+                  (entity-put-key result key val))))
+    result))

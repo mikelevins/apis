@@ -1,5 +1,4 @@
 ;;;; ***********************************************************************
-;;;; FILE IDENTIFICATION
 ;;;;
 ;;;; Name:          apis.asd
 ;;;; Project:       the apis message-passing system
@@ -38,8 +37,8 @@
                              (:file "data-absent")
                              (:file "algo-diffie-hellman")
                              (:file "data-identifier")
-                             (:file "comm-message")
                              (:file "comm-envelope")
+                             (:file "comm-message")
                              (:file "agent-common")))))
 
 ;;; (asdf:load-system :apis)

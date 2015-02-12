@@ -10,26 +10,26 @@
 
 (in-package #:apis)
 
-(defparameter *agent-lock* (bt:make-lock))
-
 (defclass agent ()
   ((id :reader agent-id :initform (makeid) :initarg :id)
+   (lock :reader agent-lock :initform (bt:make-lock))
    (message-ready? :reader agent-message-ready? :initform (bt:make-condition-variable))
    (message-queue :accessor agent-message-queue :initform (make-instance 'queues:simple-cqueue))
    (event-process :accessor agent-event-process :initform nil)))
 
+
 (defmethod handle-message ((agent agent) msg)
-  (warn (format nil "~%Agent ~S received message ~S" agent msg)))
+  (warn "You must specialize HANDLE-MESSAGE on a subclass of AGENT"))
 
 (defmethod run-agent ((agent agent))
   (loop
-   (bt:with-lock-held (*agent-lock*)
+   (bt:with-lock-held ((agent-lock agent))
      (loop for msg = (queues:qpop (agent-message-queue agent))
            then (queues:qpop (agent-message-queue agent))
            while msg
            do (handle-message agent msg))
      (bt:condition-wait (agent-message-ready? agent)
-                        *agent-lock*))))
+                        (agent-lock agent)))))
 
 
 (defmethod make-agent-event-process ((agent agent))
@@ -46,7 +46,7 @@
       (bt:destroy-thread handler))))
 
 (defmethod deliver-message (msg (agent agent))
-  (bt:with-lock-held (*agent-lock*)
+  (bt:with-lock-held ((agent-lock agent))
     (queues:qpush (agent-message-queue agent) msg)
     (bt:condition-notify (agent-message-ready? agent))))
 
