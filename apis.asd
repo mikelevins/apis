@@ -1,44 +1,14 @@
-;;;; ***********************************************************************
-;;;;
-;;;; Name:          apis.asd
-;;;; Project:       the apis message-passing system
-;;;; Purpose:       system definition
-;;;; Author:        mikel evins
-;;;; Copyright:     2014 by mikel evins
-;;;;
-;;;; ***********************************************************************
-
-(in-package :cl-user)
-
-(require :asdf)
-
-;;; ---------------------------------------------------------------------
-;;; apis system
-;;; ---------------------------------------------------------------------
 ;;;; apis.asd
 
 (asdf:defsystem #:apis
-  :serial t
-  :description "Apis: swarms of threads and processes passing messages"
-  :author "mikel evins <mevins@me.com>"
+  :description "a worker bee for application hives"
+  :author "mikel evins <mikel@evins.net>"
   :license "Apache 2.0"
-  :depends-on (:usocket
-               :ironclad
-               :uuid
-               :cl-base64
-               :queues 
-               :queues.simple-cqueue
-               :cl-store
-               :flexi-streams
-               :singleton-classes)
+  :serial t
   :components ((:module "src"
-                :serial t
-                :components ((:file "package")
-                             (:file "data-absent")
-                             (:file "algo-diffie-hellman")
-                             (:file "data-identifier")
-                             (:file "comm-envelope")
-                             (:file "comm-message")
-                             (:file "agent-common")))))
+                        :serial t
+                        :components ((:file "package")
+                                     (:file "apis")))))
 
-;;; (asdf:load-system :apis)
+
+
