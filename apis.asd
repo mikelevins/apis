@@ -19,10 +19,11 @@
     :author "mikel evins <mikel@evins.net>"
     :license "Apache 2.0"
     :serial t
-    :depends-on ()
+    :depends-on (:cl-emb :parenscript :hunchentoot)
     :components ((:module "src"
                           :serial t
                           :components ((:file "package")
+                                       (:file "system-html")
                                        (:file "apis")))))
 
 ;;; (asdf:load-system :apis)
