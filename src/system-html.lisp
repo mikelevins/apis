@@ -2,7 +2,7 @@
 ;;;;
 ;;;; Name:          system-html.lisp
 ;;;; Project:       apis
-;;;; Purpose:       tools for processing html templates
+;;;; Purpose:       processing html templates
 ;;;; Author:        mikel evins
 ;;;; Copyright:     2017 by mikel evins
 ;;;;
