@@ -10,4 +10,11 @@
 
 (in-package #:apis)
 
+(defparameter *server* (make-instance 'hunchentoot:easy-acceptor :port 10101))
 
+(hunchentoot:define-easy-handler (say-yo :uri "/yo") (name)
+  (setf (hunchentoot:content-type*) "text/html")
+  (format nil "<html><body><p>Hello, ~A.</p></body></html>" name))
+
+;;; (hunchentoot:start *server*)
+;;; (hunchentoot:stop *server*)

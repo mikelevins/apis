@@ -37,6 +37,6 @@
   (compile-template (pathname path) env))
 
 #|
-(compile-template (asdf:system-relative-pathname :apis #P"templates/error.tmpl"))
+(compile-template (asdf:system-relative-pathname :apis #P"templates/error.html.tmpl"))
 |#
 

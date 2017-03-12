@@ -1,8 +1,13 @@
 <!DOCTYPE html>
 <html>
   <head>
-    <% @include include/meta.tmpl %>
-    <% @include include/css-links.tmpl %>
+    <meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <link href="css/hint.min.css" rel="stylesheet" type="text/css" />
+<link href="css/tachyons.min.css" rel="stylesheet" type="text/css" />
+<link href="css/strongholds.css" rel="stylesheet" type="text/css" />
+
     <title>error</title>
     <script>
       function returnToApis() {
@@ -13,7 +18,7 @@
   <body class="page-error">
     <div>
       <h1>Error</h1>
-      <p><% @var error-message %></p>
+      <p></p>
       <form>
         <input type="button" value="Okay"
                onclick="returnToApis()"/>
