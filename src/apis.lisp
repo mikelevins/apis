@@ -1,7 +1,7 @@
 ;;;; ***********************************************************************
 ;;;;
 ;;;; Name:          apis.lisp
-;;;; Project:       apis: a worker bee for application hives
+;;;; Project:       apis: worker bees for application hives
 ;;;; Purpose:       main apis program
 ;;;; Author:        mikel evins
 ;;;; Copyright:     2017 by mikel evins

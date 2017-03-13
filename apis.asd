@@ -2,7 +2,7 @@
 ;;;; ***********************************************************************
 ;;;;
 ;;;; Name:          apis.asd
-;;;; Project:       apis: a worker bee for application hives
+;;;; Project:       apis: worker bees for application hives
 ;;;; Purpose:       apis system definition
 ;;;; Author:        mikel evins
 ;;;; Copyright:     2017 by mikel evins
@@ -16,11 +16,11 @@
 ;;; ---------------------------------------------------------------------
 
 (asdf:defsystem #:apis
-    :description "a worker bee for application hives"
+    :description "worker bees for application hives"
     :author "mikel evins <mikel@evins.net>"
     :license "Apache 2.0"
     :serial t
-    :depends-on (:cl-emb :parenscript :hunchentoot :smackjack)
+    :depends-on (:flexi-streams :cl-emb :parenscript :hunchentoot)
     :components ((:module "src"
                           :serial t
                           :components ((:file "package")

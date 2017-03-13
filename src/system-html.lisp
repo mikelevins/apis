@@ -1,7 +1,7 @@
 ;;;; ***********************************************************************
 ;;;;
 ;;;; Name:          system-html.lisp
-;;;; Project:       apis
+;;;; Project:       apis: worker bees for application hives
 ;;;; Purpose:       processing html templates
 ;;;; Author:        mikel evins
 ;;;; Copyright:     2017 by mikel evins
