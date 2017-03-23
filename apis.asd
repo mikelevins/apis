@@ -20,7 +20,7 @@
     :author "mikel evins <mikel@evins.net>"
     :license "Apache 2.0"
     :serial t
-    :depends-on (:flexi-streams :cl-emb :parenscript :hunchentoot)
+    :depends-on (:uiop :flexi-streams :cl-emb :parenscript :hunchentoot)
     :components ((:module "src"
                           :serial t
                           :components ((:file "package")
