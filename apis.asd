@@ -19,10 +19,11 @@
     :author "mikel evins <mikel@evins.net>"
     :license "Apache 2.0"
     :serial t
-    :depends-on (:cl-fad :flexi-streams :cl-emb :parenscript :hunchentoot)
+    :depends-on (:trivial-utf-8 :cl-fad :quri :cl-emb :wookie)
     :components ((:module "src"
                           :serial t
                           :components ((:file "package")
                                        (:file "system-server")))))
+
 
 ;;; (asdf:load-system :apis)

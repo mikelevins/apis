@@ -9,5 +9,5 @@
 ;;;; ***********************************************************************
 
 (defpackage #:apis
-  (:use #:cl #:cl-fad))
+  (:use #:cl #:cl-fad #:quri :wookie :wookie-plugin-export))
 
