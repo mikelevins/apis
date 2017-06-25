@@ -23,21 +23,6 @@
     :components ((:module "src"
                           :serial t
                           :components ((:file "package")
-                                       (:file "system-project")
-                                       (:file "system-html")
-                                       (:file "system-server")
-                                       (:file "apis")))))
+                                       (:file "system-server")))))
 
 ;;; (asdf:load-system :apis)
-
-(asdf:defsystem #:build-apis
-  :description "build the apis executable"
-  :author "mikel evins <mikel@evins.net>"
-  :license "Apache 2.0"
-  :serial t
-  :depends-on (:apis)
-  :components ((:module "src"
-                        :serial t
-                        :components ((:file "build")))))
-
-;;; (build-apis)
