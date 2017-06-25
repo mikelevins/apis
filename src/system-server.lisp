@@ -10,14 +10,11 @@
 
 (in-package #:apis)
 
-(defroute (:get "/")(request response)
-  (send-response response :body "Welcome to apis"))
-
 ;;; TODO: write config support so we can find
 ;;;       this directory some real way
 (def-directory-route "/" (server-path "public/"))
 
-(defparameter *server* nil)
+(defvar *server* nil)
 
 (defun start ()
   (unless *server*

@@ -10,3 +10,12 @@
 
 (in-package #:apis)
 
+
+(defmethod render-template ((path pathname) &rest env)
+  (emb:execute-emb path :env env))
+
+(defmethod render-template ((path string) &rest env)
+  (apply 'render-template (pathname path) env))
+
+;;; (render-template "/Users/mikel/Workshop/src/apis/templates/main.page" :page-title "Hello!")
+
