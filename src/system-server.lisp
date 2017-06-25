@@ -10,12 +10,12 @@
 
 (in-package #:apis)
 
-(load-plugins)
-
 (defroute (:get "/")(request response)
   (send-response response :body "Welcome to apis"))
 
-(def-directory-route "/" "/Users/mikel/Workshop/src/apis/public")
+;;; TODO: write config support so we can find
+;;;       this directory some real way
+(def-directory-route "/" (server-path "public/"))
 
 (defparameter *server* nil)
 
@@ -38,3 +38,4 @@
 
 ;;; (start)
 ;;; (stop)
+

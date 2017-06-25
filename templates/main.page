@@ -1,0 +1,17 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <% @include include/meta.tmpl %>
+        <% @include include/css-links.tmpl %>
+        <title><% @var page-title %></title>
+        <script>
+         function returnHome() {
+             window.location.href="/";
+         }
+        </script>
+    </head>
+    <body id="page_body" class="">
+        <div id="page_content" class="">
+        </div>
+    </body>
+</html>
