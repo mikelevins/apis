@@ -10,8 +10,7 @@
 
 (in-package #:apis)
 
-(defroute (:get "/")(request response)
+(defroute (:get "/main")(request response)
   (send-response response
                  :body (render-template "/Users/mikel/Workshop/src/apis/templates/main.page"
                                         :page-title "Welcome to Apis!")))
-

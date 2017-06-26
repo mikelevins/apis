@@ -12,7 +12,7 @@
 
 ;;; TODO: write config support so we can find
 ;;;       this directory some real way
-(def-directory-route "/" (server-path "public/"))
+(def-directory-route "/" (namestring (server-path "public/")))
 
 (defvar *server* nil)
 
