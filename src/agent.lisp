@@ -19,7 +19,7 @@
    (event-process :accessor agent-event-process :initform nil)))
 
 (defmethod handle-message ((agent agent) msg)
-  (capi:display-message (format nil "~%Agent ~S received message ~S" agent msg)))
+  (format t "~%Agent ~S received message ~S" agent msg))
 
 (defmethod run-agent ((agent agent))
   (loop
