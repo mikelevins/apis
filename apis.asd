@@ -27,7 +27,7 @@
   :depends-on (:usocket
                :ironclad
                :uuid
-               ;;:cl-prevalence
+               :cl-store
                :cl-base64
                :queues 
                :queues.simple-cqueue
@@ -40,6 +40,7 @@
                              (:file "diffie-hellman")
                              (:file "identifier")
                              (:file "message")
+                             (:file "messenger")
                              (:file "envelope")
                              (:file "agent")
                              ))))

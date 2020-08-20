@@ -103,13 +103,17 @@
     (queues::qpush (messenger-send-queue (the-messenger)) envelope)))
 
 (defun object->bytes (obj)
-  (let* ((data (ccl::with-output-to-vector (out)
+  (let* ((data (flexi-streams:with-output-to-sequence (out)
                  (cl-store:store obj out))))
-    (coerce data 'ccl::simple-unsigned-byte-vector)))
+    data))
+
+;;; (type-of (object->bytes (list :list 1 "two" 3)))
 
 (defmethod bytes->object ((bytes vector))
-  (ccl::with-input-from-vector (in bytes)
+  (flexi-streams::with-input-from-sequence (in bytes)
     (cl-store:restore in)))
+
+;;; (bytes->object (object->bytes (list :list 1 "two" 3)))
 
 ;;; (start-messaging)
 ;;; (defparameter $msg1 (make-instance 'singleton-message :data '(1 2 3)))
