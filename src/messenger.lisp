@@ -119,6 +119,7 @@
 ;;; (start-messaging)
 ;;; (defparameter $msg1 (make-instance 'singleton-message :data '(1 2 3)))
 ;;; (send-message $msg1 *localhost* *message-receive-port*)
+;;; (send-message $msg1 "192.168.0.78" *message-receive-port*)
 ;;; (stop-messaging)
 ;;; (describe (messenger-receive-queue (the-messenger)))
 ;;; (describe (the-messenger))
