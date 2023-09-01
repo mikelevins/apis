@@ -36,8 +36,6 @@
   :components ((:module "src"
                 :serial t
                 :components ((:file "package")
-                             (:file "absent")
-                             (:file "diffie-hellman")
                              (:file "identifier")
                              (:file "message")
                              (:file "messenger")
