@@ -122,3 +122,8 @@
 ;;; (stop-messaging)
 ;;; (describe (messenger-receive-queue (the-messenger)))
 ;;; (describe (the-messenger))
+
+;;; (setf $msgdata (queues:qpop (messenger-receive-queue (the-messenger))))
+;;; (setf $msgobj (bytes->object $msgdata))
+;;; (describe $msgobj)
+;;; (describe (bytes->object (envelope-message-data $msgobj)))
