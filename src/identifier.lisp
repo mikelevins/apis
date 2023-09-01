@@ -10,16 +10,50 @@
 
 (in-package #:apis)
 
-;;; this version of makeid generates a v4 uuid and converts it to 
-;;; a 128-bit integer
+;;; this version of makeid generates a 
+
+(defun get-ip-address ()
+  (let* ((interfaces (ip-interfaces:get-ip-interfaces))
+         (addresses (mapcar 'ip-interfaces:ip-interface-address interfaces)))
+    (find-if-not (lambda (addr)(equalp addr #(127 0 0 1)))
+                 addresses)))
+
+#+nil (get-ip-address)
+
+(defun nodebits ()
+  ;; the low-order 10 bits of the machine's private IP address
+  (let* ((address (get-ip-address))
+         (address-integer (if address
+                              (reduce #'(lambda (n byte)
+                                          (+ (* n 255) byte))
+                                      address
+                                      :initial-value 0)
+                              ;; if we can't get an IP we just use 1023
+                              #b1111111111)))
+    (logand address-integer #b1111111111)))
+
+#+nil (nodebits)
+
+(defun timestamp-milliseconds ()
+  "Returns the number of milliseconds elapsed since 1 January 1970 00:00:00 UTC."
+  (let* ((now (local-time:now))
+         (seconds (local-time:timestamp-to-unix now))
+         (milliseconds (local-time:timestamp-millisecond now)))
+    (+ (* 1000 seconds) milliseconds)))
+
+#+nil
+(timestamp-milliseconds)
 
 (defun makeid ()
-  (let* ((uuid (uuid:make-v4-uuid))
-         (bytes (uuid:uuid-to-byte-array uuid))
-         (max-index (1- (length bytes))))
-    (loop for byte across bytes
-      for i from 0
-      summing (ash byte (* 8 (- max-index i))) into total
-      finally (return total))))
+  (let* ((nodebits (nodebits))
+         (ts (timestamp-milliseconds))
+         (random-bits (random (1+ #b111111111111))))
+    (logior (ash 0 63)
+            (ash ts 22)
+            (ash nodebits 12)
+            random-bits)))
+
+
 
 ;;; (time (makeid))
+;;; (integer-length (makeid))

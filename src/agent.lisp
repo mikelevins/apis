@@ -51,10 +51,15 @@
     (bt:condition-notify (agent-message-ready? agent))))
 
 ;;; (defparameter $a (make-instance 'agent))
+;;; (defparameter $b (make-instance 'agent))
 ;;; (describe $a)
+;;; (describe $b)
 ;;; (start-agent $a)
+;;; (start-agent $b)
 ;;; (deliver-message (vector 1) $a)
+;;; (deliver-message (vector 2) $b)
 ;;; (deliver-message (vector 1 2) $a)
 ;;; (deliver-message (vector 1 2 3) $a)
 ;;; (stop-agent $a)
-
+;;; (queues:qsize (agent-message-queue $a))
+;;; (queues:qsize (agent-message-queue $b))

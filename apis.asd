@@ -23,10 +23,10 @@
   :serial t
   :description "Apis: swarms of threads and processes passing messages"
   :author "mikel evins <mevins@me.com>"
-  :license "Apache 2.0"
+  :license "MIT"
   :depends-on (:usocket
-               :ironclad
-               :uuid
+               :ip-interfaces
+               :local-time
                :cl-store
                :cl-base64
                :queues 
@@ -46,3 +46,4 @@
                              ))))
 
 ;;; (asdf:load-system :apis)
+;;; (ql:quickload :apis)
