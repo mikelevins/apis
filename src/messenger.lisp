@@ -29,7 +29,8 @@
    (receive-buffer :accessor messenger-receive-buffer :initform nil)
    (sender-process :accessor messenger-sender-process :initform nil)
    (send-queue :accessor messenger-send-queue :initform nil)
-   (send-queue-occupied? :accessor send-queue-occupied? :initform (bt:make-condition-variable :name 'send-queue-occupied?))
+   (send-queue-occupied? :accessor send-queue-occupied?
+                         :initform (bt:make-condition-variable :name "send-queue-occupied?"))
    (send-buffer :accessor messenger-send-buffer :initform nil))
   (:metaclass singleton-classes:singleton-class))
 
@@ -120,4 +121,4 @@
 ;;; (send-message $msg1 *localhost* *message-receive-port*)
 ;;; (stop-messaging)
 ;;; (describe (messenger-receive-queue (the-messenger)))
-;;; (describe (the-messenger))
+;;; (describe (the-messenger))q
