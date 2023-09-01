@@ -46,12 +46,13 @@ To send a message, a programmer uses the following steps:
 2. Serialize the the message and insert it into an envelope, then address the envelope,
    inserting the correct destination host and port.
 
-3. Enqueue the envelope+message for devlivery. From this point, the
+3. Enqueue the envelope+message for delivery. From this point, the
    messenger takes over.
 
-4. The messenger delivers the message. If it's immediate, the
-   messenger inserts it directly into the proper receive
-   queue. Otherwise, it moves to the next step.
+4. The messenger delivers the message. If the destination is in the
+   same process as the sender, then the messenger inserts it directly
+   into the proper receive queue. Otherwise, it moves to the next
+   step.
 
 5. The messenger packages the envelope+message for delivery. This
    means compiling and serializing the data, encrypting it, and
