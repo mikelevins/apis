@@ -9,5 +9,12 @@
 ;;;; ***********************************************************************
 
 (defpackage #:apis
-  (:use #:cl))
+  (:use #:cl)
+  (:export
+   #:agent
+   #:envelope
+   #:makeid
+   #:message
+   #:messenger
+   #:singleton-message))
 
