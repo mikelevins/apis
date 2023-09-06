@@ -23,6 +23,10 @@
   (or (slot-value agent 'name)
       (agent-id agent)))
 
+(defmethod print-object ((obj agent) stream)
+  (print-unreadable-object (obj stream :type t :identity nil)
+    (format stream "~A" (agent-name obj))))
+
 (defmethod handle-message ((agent agent) msg)
   (format t "~%Agent ~S received message ~S" agent msg))
 
