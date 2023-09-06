@@ -14,9 +14,14 @@
 
 (defclass agent ()
   ((id :reader agent-id :initform (makeid) :initarg :id)
+   (name :initform nil :initarg :name)
    (message-ready? :reader agent-message-ready? :initform (bt:make-condition-variable))
    (message-queue :accessor agent-message-queue :initform (make-instance 'queues:simple-cqueue))
    (event-process :accessor agent-event-process :initform nil)))
+
+(defmethod agent-name ((agent agent))
+  (or (slot-value agent 'name)
+      (agent-id agent)))
 
 (defmethod handle-message ((agent agent) msg)
   (format t "~%Agent ~S received message ~S" agent msg))
