@@ -26,7 +26,6 @@
   :license "MIT"
   :depends-on (:usocket
                :ip-interfaces
-               :local-time
                :cl-store
                :cl-base64
                :queues 

@@ -35,11 +35,8 @@
 #+nil (nodebits)
 
 (defun timestamp-milliseconds ()
-  "Returns the number of milliseconds elapsed since 1 January 1970 00:00:00 UTC."
-  (let* ((now (local-time:now))
-         (seconds (local-time:timestamp-to-unix now))
-         (milliseconds (local-time:timestamp-millisecond now)))
-    (+ (* 1000 seconds) milliseconds)))
+  "Returns the number of milliseconds elapsed since 1 January 1900 00:00:00 UTC."
+  (get-universal-time))
 
 #+nil
 (timestamp-milliseconds)
