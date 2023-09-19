@@ -35,8 +35,8 @@
 #+nil (nodebits)
 
 (defun timestamp-milliseconds ()
-  "Returns the number of milliseconds elapsed since 1 January 1900 00:00:00 UTC."
-  (get-universal-time))
+  "Returns the number of milliseconds elapsed since 1 January 2010 00:00:00 UTC."
+  (- (get-universal-time) +apis-epoch+))
 
 #+nil
 (timestamp-milliseconds)

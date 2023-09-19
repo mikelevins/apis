@@ -35,6 +35,7 @@
   :components ((:module "src"
                 :serial t
                 :components ((:file "package")
+                             (:file "parameters")
                              (:file "identifier")
                              (:file "message")
                              (:file "messenger")
