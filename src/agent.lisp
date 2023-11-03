@@ -70,5 +70,6 @@
 ;;; (deliver-message (vector 1 2) $a)
 ;;; (deliver-message (vector 1 2 3) $a)
 ;;; (stop-agent $a)
+;;; (stop-agent $b)
 ;;; (queues:qsize (agent-message-queue $a))
 ;;; (queues:qsize (agent-message-queue $b))
