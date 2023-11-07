@@ -32,7 +32,8 @@
                :queues 
                :queues.simple-cqueue
                :flexi-streams
-               :singleton-classes)
+               :singleton-classes
+               :local-time)
   :components ((:module "src"
                 :serial t
                 :components ((:file "package")

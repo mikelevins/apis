@@ -24,6 +24,15 @@
    (timestamp :reader message-timestamp :initform (get-universal-time) :initarg :timestamp)
    (time-to-live :reader message-time-to-live :initform *default-message-time-to-live* :initarg :time-to-live)))
 
+(defmethod print-object ((obj message) out-stream)
+  (print-unreadable-object (obj out-stream :type t :identity t)
+    (let ((timestamp (message-timestamp obj)))
+      (format out-stream "timestamp: ~S"
+              (if timestamp
+                  (local-time:universal-to-timestamp timestamp)
+                  nil)))))
+
+
 ;;; a singleton message is a one-shot, asynchronous, fire-and-forget message
 ;;; once sent, it's forgotten. best used for updates that can safely be
 ;;; lost.

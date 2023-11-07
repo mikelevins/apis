@@ -47,7 +47,7 @@
          (usocket:socket-receive socket (messenger-receive-buffer (the-messenger)) 
                                  (array-total-size (messenger-receive-buffer (the-messenger))))
        (queues:qpush (messenger-receive-queue (the-messenger)) 
-                     (subseq buffer 0 size)))))
+                     (bytes->object (subseq buffer 0 size))))))
 
 (defun run-sender ()
   (loop
@@ -126,11 +126,9 @@
 ;;; (describe (the-messenger))
 ;;; (stop-messaging)
 
-;;; (setf $msgdata1 (queues:qpop (messenger-receive-queue (the-messenger))))
-;;; (setf $msgdata2 (queues:qpop (messenger-receive-queue (the-messenger))))
-;;; (setf $msgobj1 (bytes->object $msgdata1))
-;;; (setf $msgobj2 (bytes->object $msgdata2))
-;;; (describe $msgobj1)
-;;; (describe $msgobj2)
-;;; (describe (envelope-message-data $msgobj1))
-;;; (describe (envelope-message-data $msgobj2))
+;;; (setf $rmsg1 (queues:qpop (messenger-receive-queue (the-messenger))))
+;;; (setf $rmsg2 (queues:qpop (messenger-receive-queue (the-messenger))))
+;;; (describe $rmsg1)
+;;; (describe $rmsg2)
+;;; (describe (envelope-message-data $rmsg1))
+;;; (describe (envelope-message-data $rmsg2))
