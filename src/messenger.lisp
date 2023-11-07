@@ -41,6 +41,18 @@
 (defmethod clear-receive-buffer () (fill (messenger-receive-buffer (the-messenger)) 0))
 (defun clear-messenger-buffers ()(clear-send-buffer)(clear-receive-buffer))
 
+(defmethod find-known-agent ((name symbol))
+  (gethash name (messenger-known-agents (the-messenger)) nil))
+
+(defmethod define-known-agent ((name symbol)(agent agent))
+  (let ((old-agent (find-known-agent name)))
+    (when old-agent (stop-agent old-agent)))
+  (setf (gethash name (messenger-known-agents (the-messenger)))
+        agent)
+  agent)
+
+#+nil (find-known-agent :arbitrary)
+
 (defun run-receiver (socket)
   (loop
      (usocket:wait-for-input socket)
