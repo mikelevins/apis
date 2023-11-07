@@ -31,7 +31,8 @@
    (send-queue :accessor messenger-send-queue :initform nil)
    (send-queue-occupied? :accessor send-queue-occupied?
                          :initform (bt:make-condition-variable :name "send-queue-occupied?"))
-   (send-buffer :accessor messenger-send-buffer :initform nil))
+   (send-buffer :accessor messenger-send-buffer :initform nil)
+   (known-agents :accessor messenger-known-agents :initform (make-hash-table :test 'equal)))
   (:metaclass singleton-classes:singleton-class))
 
 (defun the-messenger ()(make-instance 'messenger))
