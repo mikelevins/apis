@@ -25,7 +25,7 @@
    (time-to-live :reader message-time-to-live :initform *default-message-time-to-live* :initarg :time-to-live)))
 
 (defmethod print-object ((obj message) out-stream)
-  (print-unreadable-object (obj out-stream :type t :identity t)
+  (print-unreadable-object (obj out-stream :type t :identity nil)
     (let ((timestamp (message-timestamp obj)))
       (format out-stream "timestamp: ~S"
               (if timestamp
