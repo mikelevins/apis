@@ -122,6 +122,7 @@
 ;;; (send-message $msg1 *localhost* *message-receive-port*)
 ;;; (send-message $msg2 *localhost* *message-receive-port*)
 ;;; (send-message $msg1 "192.168.0.78" *message-receive-port*)
+;;; (send-message $msg1 "192.168.0.159" *message-receive-port*)
 ;;; (describe (messenger-receive-queue (the-messenger)))
 ;;; (describe (messenger-send-queue (the-messenger)))
 ;;; (describe (the-messenger))
