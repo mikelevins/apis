@@ -141,10 +141,14 @@
 
 (defun stop-messaging ()
   (let ((receiver (shiftf (messenger-receiver-process (the-messenger)) nil))
+        (receive-socket (messenger-receive-socket (the-messenger)))
         (sender (shiftf (messenger-sender-process (the-messenger)) nil))
         (agents-table (messenger-known-agents (the-messenger))))
     (when receiver
       (bt:destroy-thread receiver))
+    (when receive-socket
+      (usocket:socket-close receive-socket)
+      (setf (messenger-receive-socket (the-messenger)) nil))
     (when sender
       (bt:destroy-thread sender))
     (when agents-table
@@ -178,6 +182,7 @@
 ;;; (defparameter $msg2 (make-instance 'singleton-message :data '(3 2 1)))
 ;;; (send-message $msg1 *localhost* *message-receive-port*)
 ;;; (send-message $msg2 *localhost* *message-receive-port*)
+;;; (send-message $msg1 *localhost* *message-receive-port* :default-recipient)
 ;;; (send-message $msg1 "192.168.0.78" *message-receive-port*)
 ;;; (send-message $msg2 "192.168.0.159" *message-receive-port*)
 ;;; (describe (messenger-receive-queue (the-messenger)))
