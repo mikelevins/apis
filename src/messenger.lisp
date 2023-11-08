@@ -147,8 +147,12 @@
     (when sender
       (bt:destroy-thread sender))))
 
-(defmethod send-message ((message message)(host string)(port integer))
-  (let* ((envelope (make-instance 'envelope :message-data message :destination-host host :destination-port port)))
+(defmethod send-message ((message message)(host string)(port integer) &optional (destination-agent nil))
+  (let* ((envelope (make-instance 'envelope
+                                  :message-data message
+                                  :destination-host host
+                                  :destination-port port
+                                  :destination-agent destination-agent)))
     (queues::qpush (messenger-send-queue (the-messenger)) envelope)))
 
 (defun object->bytes (obj)
@@ -170,7 +174,7 @@
 ;;; (send-message $msg1 *localhost* *message-receive-port*)
 ;;; (send-message $msg2 *localhost* *message-receive-port*)
 ;;; (send-message $msg1 "192.168.0.78" *message-receive-port*)
-;;; (send-message $msg1 "192.168.0.159" *message-receive-port*)
+;;; (send-message $msg2 "192.168.0.159" *message-receive-port*)
 ;;; (describe (messenger-receive-queue (the-messenger)))
 ;;; (describe (messenger-send-queue (the-messenger)))
 ;;; (describe (the-messenger))
