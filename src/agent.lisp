@@ -28,7 +28,7 @@
     (format stream "~A" (agent-name obj))))
 
 (defmethod handle-message ((agent agent) msg)
-  (format t "~%Agent ~S received message ~S" agent msg))
+  (format t "~%Agent ~S received message:~%  ~S" agent msg))
 
 (defmethod run-agent ((agent agent))
   (loop

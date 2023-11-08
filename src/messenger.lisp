@@ -27,13 +27,25 @@
    (receiver-process :accessor messenger-receiver-process :initform nil)
    (receive-queue :accessor messenger-receive-queue :initform nil)
    (receive-buffer :accessor messenger-receive-buffer :initform nil)
+   (local-delivery-process :accessor messenger-local-delivery-process :initform nil)
    (sender-process :accessor messenger-sender-process :initform nil)
    (send-queue :accessor messenger-send-queue :initform nil)
    (send-queue-occupied? :accessor send-queue-occupied?
                          :initform (bt:make-condition-variable :name "send-queue-occupied?"))
    (send-buffer :accessor messenger-send-buffer :initform nil)
-   (known-agents :accessor messenger-known-agents :initform (make-hash-table :test 'equal)))
+   (known-agents :accessor messenger-known-agents :initform {}))
   (:metaclass singleton-classes:singleton-class))
+
+(defun make-default-recipient-agent ()
+  (make-instance 'agent :name :default-recipient))
+
+(defmethod initialize-instance :after ((messenger messenger)
+                                       &rest inits &key &allow-other-keys)
+  (unless (gethash :default-recipient (messenger-known-agents messenger) nil)
+    (let ((recip (make-default-recipient-agent)))
+      (setf (gethash :default-recipient (messenger-known-agents messenger))
+            recip)
+      (apis::start-agent recip))))
 
 (defun the-messenger ()(make-instance 'messenger))
 
@@ -51,7 +63,11 @@
         agent)
   agent)
 
+(defun reset-default-recipient-agent ()
+  (define-known-agent :default-recipient (make-default-recipient-agent)))
+
 #+nil (find-known-agent :arbitrary)
+#+nil (describe (find-known-agent :default-recipient))
 
 (defun run-receiver (socket)
   (loop
@@ -61,6 +77,23 @@
                                  (array-total-size (messenger-receive-buffer (the-messenger))))
        (queues:qpush (messenger-receive-queue (the-messenger)) 
                      (bytes->object (subseq buffer 0 size))))))
+
+(defparameter *last-local-message-delivery* nil)
+
+(defun deliver-message-to-agent (envelope)
+  (let* ((destination-agent-name (envelope-destination-agent envelope))
+         (recipient (or (find-known-agent destination-agent-name)
+                        (find-known-agent :default-recipient))))
+    (deliver-message envelope recipient)
+    (setf *last-local-message-delivery*
+          (cons recipient envelope))))
+
+(defun run-local-message-delivery ()
+  (loop
+     (sleep 0.125)
+     (let ((envelope (queues:qpop (messenger-receive-queue (the-messenger)))))
+       (when envelope
+         (deliver-message-to-agent envelope)))))
 
 (defun run-sender ()
   (loop
@@ -99,6 +132,9 @@
                             (unwind-protect (run-receiver socket)
                               (usocket:socket-close socket)))
                           :name (format nil "message receiver [~a]" port)))
+    (setf (messenger-local-delivery-process (the-messenger))
+          (bt:make-thread (lambda ()(run-local-message-delivery))
+                          :name (format nil "local message delivery")))
     (setf (messenger-sender-process (the-messenger))
           (bt:make-thread (lambda ()(run-sender))
                           :name (format nil "message sender")))))
@@ -138,6 +174,7 @@
 ;;; (describe (messenger-receive-queue (the-messenger)))
 ;;; (describe (messenger-send-queue (the-messenger)))
 ;;; (describe (the-messenger))
+;;; (describe (find-known-agent :default-recipient))
 ;;; (stop-messaging)
 
 ;;; (setf $rmsg1 (queues:qpop (messenger-receive-queue (the-messenger))))
@@ -146,3 +183,7 @@
 ;;; (describe $rmsg2)
 ;;; (describe (envelope-message-data $rmsg1))
 ;;; (describe (envelope-message-data $rmsg2))
+
+;;; (find-known-agent :default-recipient)
+;;; (messenger-known-agents (the-messenger))
+;;; (reset-default-recipient-agent)

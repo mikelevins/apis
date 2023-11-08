@@ -33,16 +33,17 @@
                :queues.simple-cqueue
                :flexi-streams
                :singleton-classes
-               :local-time)
+               :local-time
+               :net.bardcode.literals)
   :components ((:module "src"
                 :serial t
                 :components ((:file "package")
                              (:file "parameters")
                              (:file "identifier")
                              (:file "message")
+                             (:file "agent")
                              (:file "messenger")
                              (:file "envelope")
-                             (:file "agent")
                              ))))
 
 ;;; (asdf:load-system :apis)

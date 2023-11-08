@@ -23,9 +23,8 @@
 
 (defmethod print-object ((obj envelope) out-stream)
   (print-unreadable-object (obj out-stream :type t :identity nil)
-    (format out-stream "~A:~S, agent: ~S, data: ~S"
-            (envelope-destination-host obj)
-            (envelope-destination-port obj)
+    (format out-stream "to: ~S@~A:~A"
             (envelope-destination-agent obj)
-            (envelope-message-data obj))))
+            (envelope-destination-host obj)
+            (envelope-destination-port obj))))
 
