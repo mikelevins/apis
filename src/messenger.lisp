@@ -141,11 +141,16 @@
 
 (defun stop-messaging ()
   (let ((receiver (shiftf (messenger-receiver-process (the-messenger)) nil))
-        (sender (shiftf (messenger-sender-process (the-messenger)) nil)))
+        (sender (shiftf (messenger-sender-process (the-messenger)) nil))
+        (agents-table (messenger-known-agents (the-messenger))))
     (when receiver
       (bt:destroy-thread receiver))
     (when sender
-      (bt:destroy-thread sender))))
+      (bt:destroy-thread sender))
+    (when agents-table
+      (loop for key being the hash-keys in agents-table
+         do (let ((agent (gethash key agents-table nil)))
+              (when agent (stop-agent agent)))))))
 
 (defmethod send-message ((message message)(host string)(port integer) &optional (destination-agent nil))
   (let* ((envelope (make-instance 'envelope
