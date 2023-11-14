@@ -13,6 +13,8 @@
 (defparameter *localhost* "127.0.0.1")
 (defparameter *message-receive-port* 10764)
 (defparameter *maximum-buffer-size* 32767)
+(defparameter +messenger-log-level+ '(:debug :info :none))
+(defparameter *messenger-log-level* :info)
 
 ;;; ---------------------------------------------------------------------
 ;;; the messenger

@@ -39,6 +39,7 @@
                 :serial t
                 :components ((:file "package")
                              (:file "parameters")
+                             (:file "logging")
                              (:file "identifier")
                              (:file "message")
                              (:file "envelope")
