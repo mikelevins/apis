@@ -27,8 +27,14 @@
   (print-unreadable-object (obj stream :type t :identity nil)
     (format stream "~A" (agent-name obj))))
 
-(defmethod handle-message ((agent agent) msg)
+(defmethod handle-message ((agent agent) (env envelope))
+  (handle-message agent (envelope-contents env)))
+
+(defmethod handle-message ((agent agent) (msg message))
   (format t "~%Agent ~S received message:~%  ~S" agent msg))
+
+(defmethod handle-message ((agent agent) msg)
+  (format t "~%Agent ~S received data:~%  ~S" agent msg))
 
 (defmethod run-agent ((agent agent))
   (loop

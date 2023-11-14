@@ -41,9 +41,9 @@
                              (:file "parameters")
                              (:file "identifier")
                              (:file "message")
+                             (:file "envelope")
                              (:file "agent")
                              (:file "messenger")
-                             (:file "envelope")
                              ))))
 
 ;;; (asdf:load-system :apis)

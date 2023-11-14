@@ -81,20 +81,27 @@
 
 (defparameter *last-local-message-delivery* nil)
 
-(defun deliver-message-to-agent (envelope)
-  (let* ((destination-agent-name (envelope-destination-agent envelope))
+;;; default delivery if the datum is not an envelope
+;;; (without an envelope we don't know that the destination agent is,
+;;; so we choose the default recipient agent)
+(defmethod deliver-message-to-agent (datum)
+  (deliver-message datum (find-known-agent :default-recipient)))
+
+(defmethod deliver-message-to-agent ((env envelope))
+  (let* ((destination-agent-name (envelope-destination-agent env))
          (recipient (or (find-known-agent destination-agent-name)
-                        (find-known-agent :default-recipient))))
-    (deliver-message envelope recipient)
+                        (find-known-agent :default-recipient)))
+         (contents (envelope-contents env)))
+    (deliver-message contents recipient)
     (setf *last-local-message-delivery*
-          (cons recipient envelope))))
+          (cons recipient env))))
 
 (defun run-local-message-delivery ()
   (loop
      (sleep 0.125)
-     (let ((envelope (queues:qpop (messenger-receive-queue (the-messenger)))))
-       (when envelope
-         (deliver-message-to-agent envelope)))))
+     (let ((next (queues:qpop (messenger-receive-queue (the-messenger)))))
+       (when next
+         (deliver-message-to-agent next)))))
 
 (defun run-sender ()
   (loop
