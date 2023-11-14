@@ -9,10 +9,16 @@
 ;;;; ***********************************************************************
 
 
-(defpackage #:logging
-  (:use #:cl))
+(defpackage #:log
+  (:use #:cl)
+  (:shadow #:debug)
+  (:export
+   #:*log-level*
+   #:+log-levels+
+   #:debug
+   #:info))
 
-(in-package :logging)
+(in-package :log)
 
 (defparameter +log-levels+ '(:none :info :debug))
 
@@ -23,10 +29,10 @@
 
 (defparameter *log-level* :info)
 
-(defun log-info (stream format-string &rest args)
+(defun info (stream format-string &rest args)
   (when (member *log-level* '(:info :debug) :test 'eql)
     (apply 'format stream format-string args)))
 
-(defun log-debug (stream format-string &rest args)
+(defun debug (stream format-string &rest args)
   (when (eql :debug *log-level*)
     (apply 'format stream format-string args)))

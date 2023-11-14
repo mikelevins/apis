@@ -25,13 +25,13 @@
 
 (defmethod print-object ((obj agent) stream)
   (print-unreadable-object (obj stream :type t :identity nil)
-    (format stream "~A" (agent-name obj))))
+    (log:info stream "~A" (agent-name obj))))
 
 (defmethod handle-message-operation ((agent agent) (msg message)(op null))
-  (format t "~%Agent ~S received message:~%  ~S" agent msg))
+  (log:info t "~%Agent ~S received message:~%  ~S" agent msg))
 
 (defmethod handle-message-operation ((agent agent) (msg message)(op (eql :ping)))
-  (format t "~%Agent ~S received :ping" agent))
+  (log:info t "~%Agent ~S received :ping" agent))
 
 (defmethod handle-message ((agent agent) (msg message))
   (let ((op (message-operation msg)))
@@ -41,9 +41,9 @@
   (handle-message agent (envelope-contents env)))
 
 (defmethod handle-message ((agent agent) msg)
-  (warn "Agent ~S received unrecognized message: ~S"
-        agent (with-output-to-string (s)
-                (describe msg s))))
+  (log:info "Agent ~S received unrecognized message: ~S"
+            agent (with-output-to-string (s)
+                    (describe msg s))))
 
 (defmethod make-agent-event-process ((agent agent))
   (bt:make-thread

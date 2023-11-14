@@ -17,7 +17,7 @@
    (event-process :accessor agent-event-process :initform nil)))
 
 (defmethod handle-message ((agent agent) msg)
-  (format t "~%Agent ~S received message ~S" agent msg)
+  (log:info t "~%Agent ~S received message ~S" agent msg)
   (force-output t))
 
 (defmethod run-agent ((agent agent))
