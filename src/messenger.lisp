@@ -191,8 +191,8 @@
 ;;; (bytes->object (object->bytes (list :list 1 "two" 3)))
 
 ;;; (start-messaging)
-;;; (defparameter $msg1 (make-instance 'singleton-message :data '(1 2 3)))
-;;; (defparameter $msg2 (make-instance 'singleton-message :data '(3 2 1)))
+;;; (defparameter $msg1 (make-instance 'singleton-message :operation nil :data '(1 2 3)))
+;;; (defparameter $msg2 (make-instance 'singleton-message :operation :ping))
 ;;; (send-message $msg1 *localhost* *message-receive-port*)
 ;;; (send-message $msg2 *localhost* *message-receive-port*)
 ;;; (send-message $msg1 *localhost* *message-receive-port* :default-recipient)
