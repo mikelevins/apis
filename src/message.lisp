@@ -18,9 +18,7 @@
 (defparameter *default-message-time-to-live* 600) ; seconds
 
 (defclass message ()
-  ((sender-agent-id :reader message-sender-agent-id :initform nil :initarg :sender-agent-id)
-   (destination-agent-id :reader message-destination-agent-id :initform nil :initarg :destination-agent-id)
-   (data :reader message-data :initform nil :initarg :data)
+  ((data :reader message-data :initform nil :initarg :data)
    (timestamp :reader message-timestamp :initform (get-universal-time) :initarg :timestamp)
    (time-to-live :reader message-time-to-live :initform *default-message-time-to-live* :initarg :time-to-live)))
 

@@ -164,7 +164,7 @@
 
 (defmethod send-message ((message message)(host string)(port integer) &optional (destination-agent nil))
   (let* ((envelope (make-instance 'envelope
-                                  :message-data message
+                                  :contents message
                                   :destination-host host
                                   :destination-port port
                                   :destination-agent destination-agent)))
@@ -201,8 +201,8 @@
 ;;; (setf $rmsg2 (queues:qpop (messenger-receive-queue (the-messenger))))
 ;;; (describe $rmsg1)
 ;;; (describe $rmsg2)
-;;; (describe (envelope-message-data $rmsg1))
-;;; (describe (envelope-message-data $rmsg2))
+;;; (describe (envelope-contents $rmsg1))
+;;; (describe (envelope-contents $rmsg2))
 
 ;;; (find-known-agent :default-recipient)
 ;;; (messenger-known-agents (the-messenger))

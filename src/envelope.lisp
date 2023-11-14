@@ -19,7 +19,7 @@
    (destination-port :reader envelope-destination-port :initform nil :initarg :destination-port)
    ;; the name of a known agent object available at the detination host and port
    (destination-agent :reader envelope-destination-agent :initform nil :initarg :destination-agent)
-   (message-data :reader envelope-message-data :initform nil :initarg :message-data)))
+   (contents :reader envelope-contents :initform nil :initarg :contents)))
 
 (defmethod print-object ((obj envelope) out-stream)
   (print-unreadable-object (obj out-stream :type t :identity nil)
