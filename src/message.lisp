@@ -18,14 +18,16 @@
 (defparameter *default-message-time-to-live* 600) ; seconds
 
 (defclass message ()
-  ((data :reader message-data :initform nil :initarg :data)
+  ((operation :reader message-operation :initform :ping :initarg :operation)
+   (data :reader message-data :initform nil :initarg :data)
    (timestamp :reader message-timestamp :initform (get-universal-time) :initarg :timestamp)
    (time-to-live :reader message-time-to-live :initform *default-message-time-to-live* :initarg :time-to-live)))
 
 (defmethod print-object ((obj message) out-stream)
   (print-unreadable-object (obj out-stream :type t :identity nil)
     (let ((timestamp (message-timestamp obj)))
-      (format out-stream "timestamp: ~S"
+      (format out-stream "~S timestamp: ~S"
+              (message-operation obj)
               (if timestamp
                   (local-time:universal-to-timestamp timestamp)
                   nil)))))
