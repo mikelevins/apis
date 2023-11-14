@@ -33,30 +33,30 @@
 (defmethod handle-message-operation ((agent agent) (msg message)(op (eql :ping)))
   (format t "~%Agent ~S received :ping" agent))
 
-(defmethod handle-message ((agent agent) (env envelope))
-  (handle-message agent (envelope-contents env)))
-
 (defmethod handle-message ((agent agent) (msg message))
   (let ((op (message-operation msg)))
     (handle-message-operation agent msg op)))
 
+(defmethod handle-message ((agent agent) (env envelope))
+  (handle-message agent (envelope-contents env)))
+
 (defmethod handle-message ((agent agent) msg)
-  (format t "~%Agent ~S received data:~%  ~S" agent msg))
-
-(defmethod run-agent ((agent agent))
-  (loop
-   (bt:with-lock-held (*agent-lock*)
-     (loop for msg = (queues:qpop (agent-message-queue agent))
-           then (queues:qpop (agent-message-queue agent))
-           while msg
-           do (handle-message agent msg))
-     (bt:condition-wait (agent-message-ready? agent)
-                        *agent-lock*))))
-
+  (warn "Agent ~S received unrecognized message: ~S"
+        agent (with-output-to-string (s)
+                (describe msg s))))
 
 (defmethod make-agent-event-process ((agent agent))
-  (bt:make-thread (lambda ()(run-agent agent))
-                  :name (format nil "agent-event-process [~A]" agent)))
+  (bt:make-thread
+   (lambda ()
+     (loop
+        (bt:with-lock-held (*agent-lock*)
+          (loop for msg = (queues:qpop (agent-message-queue agent))
+             then (queues:qpop (agent-message-queue agent))
+             while msg
+             do (handle-message agent msg))
+          (bt:condition-wait (agent-message-ready? agent)
+                             *agent-lock*))))
+   :name (format nil "agent-event-process [~A]" agent)))
 
 (defmethod start-agent ((agent agent))
   (setf (agent-event-process agent)
