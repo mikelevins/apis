@@ -11,10 +11,25 @@
 (defpackage #:apis
   (:use #:cl)
   (:export
+   #:*agent-lock*
+   #:*last-local-message-delivery*
    #:agent
+   #:agent-message-queue
+   #:agent-message-ready?
+   #:define-known-agent
    #:envelope
+   #:envelope-contents
+   #:find-known-agent
+   #:handle-message
+   #:handle-message-operation
    #:makeid
    #:message
    #:messenger
-   #:singleton-message))
+   #:run-agent
+   #:send-message
+   #:singleton-message
+   #:start-agent
+   #:start-messaging
+   #:stop-messaging
+   ))
 
