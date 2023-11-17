@@ -22,6 +22,7 @@
    #:find-known-agent
    #:handle-message
    #:handle-message-operation
+   #:list-known-agents
    #:makeid
    #:message
    #:messenger
