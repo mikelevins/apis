@@ -59,6 +59,10 @@
 (defmethod find-known-agent ((name symbol))
   (gethash name (messenger-known-agents (the-messenger)) nil))
 
+(defun list-known-agents ()
+  (loop for key being the hash-keys in (messenger-known-agents (the-messenger))
+     collect key))
+
 (defmethod define-known-agent ((name symbol)(agent agent))
   (let ((old-agent (find-known-agent name)))
     (when old-agent (stop-agent old-agent)))
