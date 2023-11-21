@@ -31,6 +31,7 @@
    #:singleton-message
    #:start-agent
    #:start-messaging
+   #:stop-agent
    #:stop-messaging
    ))
 
