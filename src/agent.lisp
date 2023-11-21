@@ -67,6 +67,9 @@
     (when handler
       (bt:destroy-thread handler))))
 
+(defmethod agent-running? ((agent agent))
+  (and (agent-event-process agent) t))
+
 (defmethod deliver-message (msg (agent agent))
   (bt:with-lock-held (*agent-lock*)
     (queues:qpush (agent-message-queue agent) msg)

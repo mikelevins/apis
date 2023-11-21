@@ -16,6 +16,7 @@
    #:agent
    #:agent-message-queue
    #:agent-message-ready?
+   #:agent-running?
    #:define-known-agent
    #:envelope
    #:envelope-contents
@@ -23,6 +24,7 @@
    #:handle-message
    #:handle-message-operation
    #:list-known-agents
+   #:list-running-agents
    #:makeid
    #:message
    #:messenger

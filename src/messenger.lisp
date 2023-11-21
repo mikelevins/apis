@@ -63,6 +63,14 @@
   (loop for key being the hash-keys in (messenger-known-agents (the-messenger))
      collect key))
 
+(defun list-running-agents ()
+  (let ((found nil))
+    (loop for key being the hash-keys in (messenger-known-agents (the-messenger))
+       using (hash-value val)
+       do (when (agent-running? val)
+            (pushnew key found)))
+    found))
+
 (defmethod define-known-agent ((name symbol)(agent agent))
   (let ((old-agent (find-known-agent name)))
     (when old-agent (stop-agent old-agent)))
