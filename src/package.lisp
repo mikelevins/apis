@@ -28,6 +28,7 @@
    #:makeid
    #:message
    #:messenger
+   #:messenger-known-agents
    #:remove-known-agent
    #:run-agent
    #:send-message
