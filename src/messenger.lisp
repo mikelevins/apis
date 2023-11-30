@@ -78,6 +78,12 @@
         agent)
   agent)
 
+(defmethod remove-known-agent ((name symbol))
+  (let ((old-agent (find-known-agent name)))
+    (when old-agent (stop-agent old-agent)))
+  (remhash name (messenger-known-agents (the-messenger)))
+  name)
+
 (defun reset-default-recipient-agent ()
   (define-known-agent :default-recipient (make-default-recipient-agent)))
 
