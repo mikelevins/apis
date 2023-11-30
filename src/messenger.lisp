@@ -56,6 +56,8 @@
 (defmethod clear-receive-buffer () (fill (messenger-receive-buffer (the-messenger)) 0))
 (defun clear-messenger-buffers ()(clear-send-buffer)(clear-receive-buffer))
 
+(defmethod find-known-agent ((agent agent)) agent)
+
 (defmethod find-known-agent ((name symbol))
   (gethash name (messenger-known-agents (the-messenger)) nil))
 
