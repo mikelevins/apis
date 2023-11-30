@@ -18,6 +18,7 @@
    #:agent-message-ready?
    #:agent-running?
    #:define-known-agent
+   #:deliver-message-to-agent
    #:envelope
    #:envelope-contents
    #:find-known-agent
