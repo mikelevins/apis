@@ -36,5 +36,6 @@
    #:start-messaging
    #:stop-agent
    #:stop-messaging
+   #:the-messenger
    ))
 
