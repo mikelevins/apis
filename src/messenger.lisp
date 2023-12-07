@@ -36,19 +36,14 @@
    (send-queue-occupied? :accessor send-queue-occupied?
                          :initform (bt:make-condition-variable :name "send-queue-occupied?"))
    (send-buffer :accessor messenger-send-buffer :initform nil)
+   (default-recipient :accessor messenger-default-recipient
+     :initform (make-instance 'agent :name :default-recipient))
    (known-agents :accessor messenger-known-agents :initform {}))
   (:metaclass singleton-classes:singleton-class))
 
-(defun make-default-recipient-agent ()
-  (make-instance 'agent :name :default-recipient))
-
 (defmethod initialize-instance :after ((messenger messenger)
                                        &rest inits &key &allow-other-keys)
-  (unless (gethash :default-recipient (messenger-known-agents messenger) nil)
-    (let ((recip (make-default-recipient-agent)))
-      (setf (gethash :default-recipient (messenger-known-agents messenger))
-            recip)
-      (apis::start-agent recip))))
+  (apis::start-agent (messenger-default-recipient messenger)))
 
 (defun the-messenger ()(make-instance 'messenger))
 
@@ -85,10 +80,12 @@
   name)
 
 (defun reset-default-recipient-agent ()
-  (define-known-agent :default-recipient (make-default-recipient-agent)))
-
-#+nil (find-known-agent :arbitrary)
-#+nil (describe (find-known-agent :default-recipient))
+  (when (messenger-default-recipient (the-messenger))
+    (stop-agent (messenger-default-recipient (the-messenger))))
+  (setf (messenger-default-recipient (the-messenger))
+        (make-instance 'agent :name :default-recipient))
+  (unless (agent-running? (messenger-default-recipient (the-messenger)))
+    (start-agent (messenger-default-recipient (the-messenger)))))
 
 (defun run-receiver (socket)
   (loop
@@ -105,12 +102,12 @@
 ;;; (without an envelope we don't know that the destination agent is,
 ;;; so we choose the default recipient agent)
 (defmethod deliver-message-to-agent (datum)
-  (deliver-message datum (find-known-agent :default-recipient)))
+  (deliver-message datum (messenger-default-recipient (the-messenger))))
 
 (defmethod deliver-message-to-agent ((env envelope))
   (let* ((destination-agent-name (envelope-destination-agent env))
          (recipient (or (find-known-agent destination-agent-name)
-                        (find-known-agent :default-recipient)))
+                        (messenger-default-recipient (the-messenger))))
          (contents (envelope-contents env)))
     (deliver-message contents recipient)
     (setf *last-local-message-delivery*
@@ -136,7 +133,11 @@
          (clear-send-buffer)
          (replace (messenger-send-buffer (the-messenger)) msg-bytes)
          (let ((out (usocket:socket-connect nil nil :protocol :datagram)))
-           (usocket:socket-send out (messenger-send-buffer (the-messenger)) (length msg-bytes) :host host :port port))))))
+           (usocket:socket-send out
+                                (messenger-send-buffer (the-messenger))
+                                (length msg-bytes)
+                                :host host
+                                :port port))))))
 
 (defun start-messaging (&optional (port *message-receive-port*))
   (let* ((agents-table (messenger-known-agents (the-messenger))))
@@ -167,6 +168,11 @@
       (setf (messenger-sender-process (the-messenger))
             (bt:make-thread (lambda ()(run-sender))
                             :name (format nil "message sender"))))
+    (unless (messenger-default-recipient (the-messenger))
+      (setf (messenger-default-recipient (the-messenger))
+            (make-instance 'agent :name :default-recipient)))
+    (unless (agent-running? (messenger-default-recipient (the-messenger)))
+      (start-agent (messenger-default-recipient (the-messenger))))
     (when agents-table
       (loop for key being the hash-keys in agents-table
          do (let ((agent (gethash key agents-table nil)))
@@ -184,6 +190,9 @@
       (setf (messenger-receive-socket (the-messenger)) nil))
     (when sender
       (bt:destroy-thread sender))
+    (when (messenger-default-recipient (the-messenger))
+      (stop-agent (messenger-default-recipient (the-messenger)))
+      (setf (messenger-default-recipient (the-messenger)) nil))
     (when agents-table
       (loop for key being the hash-keys in agents-table
          do (let ((agent (gethash key agents-table nil)))
@@ -221,7 +230,6 @@
 ;;; (describe (messenger-receive-queue (the-messenger)))
 ;;; (describe (messenger-send-queue (the-messenger)))
 ;;; (describe (the-messenger))
-;;; (describe (find-known-agent :default-recipient))
 ;;; (stop-messaging)
 
 ;;; (setf $rmsg1 (queues:qpop (messenger-receive-queue (the-messenger))))
@@ -231,6 +239,4 @@
 ;;; (describe (envelope-contents $rmsg1))
 ;;; (describe (envelope-contents $rmsg2))
 
-;;; (find-known-agent :default-recipient)
 ;;; (messenger-known-agents (the-messenger))
-;;; (reset-default-recipient-agent)
