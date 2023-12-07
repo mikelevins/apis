@@ -122,7 +122,7 @@
 
 (defun run-sender ()
   (loop
-     (sleep 0.125)
+     (sleep 0.1)
      (do ((env (queues:qpop (messenger-send-queue (the-messenger)))
                (queues:qpop (messenger-send-queue (the-messenger)))))
          ;; when qpop returns nil, we've sent all the pending messages
