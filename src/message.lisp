@@ -26,11 +26,9 @@
 (defmethod print-object ((obj message) out-stream)
   (print-unreadable-object (obj out-stream :type t :identity nil)
     (let ((timestamp (message-timestamp obj)))
-      (format out-stream "~S timestamp: ~S"
+      (format out-stream "~S ~S"
               (message-operation obj)
-              (if timestamp
-                  (local-time:universal-to-timestamp timestamp)
-                  nil)))))
+              (message-data obj)))))
 
 
 ;;; a singleton message is a one-shot, asynchronous, fire-and-forget message
