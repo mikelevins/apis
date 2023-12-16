@@ -15,6 +15,7 @@
    #:*last-local-message-delivery*
    #:agent
    #:agent-message-queue
+   #:agent-event-process
    #:agent-message-ready?
    #:agent-running?
    #:define-known-agent
@@ -29,6 +30,10 @@
    #:list-running-agents
    #:makeid
    #:message
+   #:message-data
+   #:message-operation
+   #:message-timestamp
+   #:message-time-to-live
    #:messenger
    #:messenger-known-agents
    #:remove-known-agent

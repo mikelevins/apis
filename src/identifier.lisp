@@ -20,6 +20,7 @@
 
 #+nil (get-ip-address)
 
+
 (defun nodebits ()
   ;; the low-order 10 bits of the machine's private IP address
   (let* ((address (get-ip-address))
