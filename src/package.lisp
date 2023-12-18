@@ -30,6 +30,7 @@
    #:handle-message-operation
    #:list-known-agents
    #:list-running-agents
+   #:list-stopped-agents
    #:makeid
    #:message
    #:message-data
