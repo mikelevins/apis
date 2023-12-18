@@ -14,9 +14,11 @@
    #:*agent-lock*
    #:*last-local-message-delivery*
    #:agent
-   #:agent-message-queue
    #:agent-event-process
+   #:agent-id
+   #:agent-message-queue
    #:agent-message-ready?
+   #:agent-name
    #:agent-running?
    #:define-known-agent
    #:deliver-message
@@ -32,12 +34,11 @@
    #:message
    #:message-data
    #:message-operation
-   #:message-timestamp
    #:message-time-to-live
+   #:message-timestamp
    #:messenger
    #:messenger-known-agents
    #:remove-known-agent
-   #:run-agent
    #:send-message
    #:singleton-message
    #:start-agent

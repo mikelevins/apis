@@ -37,8 +37,7 @@
                          :initform (bt:make-condition-variable :name "send-queue-occupied?"))
    (send-buffer :accessor messenger-send-buffer :initform nil)
    (default-recipient :accessor messenger-default-recipient
-     :initform (make-instance 'agent :name :default-recipient))
-   (known-agents :accessor messenger-known-agents :initform {}))
+     :initform (make-instance 'agent :name :default-recipient)))
   (:metaclass singleton-classes:singleton-class))
 
 (defmethod initialize-instance :after ((messenger messenger)
@@ -51,33 +50,6 @@
 (defmethod clear-receive-buffer () (fill (messenger-receive-buffer (the-messenger)) 0))
 (defun clear-messenger-buffers ()(clear-send-buffer)(clear-receive-buffer))
 
-(defmethod find-known-agent ((name symbol))
-  (gethash name (messenger-known-agents (the-messenger)) nil))
-
-(defun list-known-agents ()
-  (loop for key being the hash-keys in (messenger-known-agents (the-messenger))
-     collect key))
-
-(defun list-running-agents ()
-  (let ((found nil))
-    (loop for key being the hash-keys in (messenger-known-agents (the-messenger))
-       using (hash-value val)
-       do (when (agent-running? val)
-            (pushnew key found)))
-    found))
-
-(defmethod define-known-agent ((name symbol)(agent agent))
-  (let ((old-agent (find-known-agent name)))
-    (when old-agent (stop-agent old-agent)))
-  (setf (gethash name (messenger-known-agents (the-messenger)))
-        agent)
-  agent)
-
-(defmethod remove-known-agent ((name symbol))
-  (let ((old-agent (find-known-agent name)))
-    (when old-agent (stop-agent old-agent)))
-  (remhash name (messenger-known-agents (the-messenger)))
-  name)
 
 (defun reset-default-recipient-agent ()
   (when (messenger-default-recipient (the-messenger))
@@ -101,15 +73,15 @@
 ;;; default delivery if the datum is not an envelope
 ;;; (without an envelope we don't know that the destination agent is,
 ;;; so we choose the default recipient agent)
-(defmethod deliver-message-to-agent (datum)
-  (deliver-message datum (messenger-default-recipient (the-messenger))))
+(defmethod deliver-message (datum)
+  (deliver-message-to-agent datum (messenger-default-recipient (the-messenger))))
 
-(defmethod deliver-message-to-agent ((env envelope))
+(defmethod deliver-message ((env envelope))
   (let* ((destination-agent-name (envelope-destination-agent env))
          (recipient (or (find-known-agent destination-agent-name)
                         (messenger-default-recipient (the-messenger))))
          (contents (envelope-contents env)))
-    (deliver-message contents recipient)
+    (deliver-message-to-agent contents recipient)
     (setf *last-local-message-delivery*
           (cons recipient env))))
 
@@ -118,7 +90,7 @@
      (sleep 0.125)
      (let ((next (queues:qpop (messenger-receive-queue (the-messenger)))))
        (when next
-         (deliver-message-to-agent next)))))
+         (deliver-message next)))))
 
 (defun run-sender ()
   (loop
@@ -140,7 +112,7 @@
                                 :port port))))))
 
 (defun start-messaging (&optional (port *message-receive-port*))
-  (let* ((agents-table (messenger-known-agents (the-messenger))))
+  (let* ((agents-table (known-agents-roster (the-known-agents))))
     (unless (messenger-receive-queue (the-messenger))
       (setf (messenger-receive-queue (the-messenger))
             (make-instance 'queues:simple-cqueue)))
@@ -182,7 +154,7 @@
   (let ((receiver (shiftf (messenger-receiver-process (the-messenger)) nil))
         (receive-socket (messenger-receive-socket (the-messenger)))
         (sender (shiftf (messenger-sender-process (the-messenger)) nil))
-        (agents-table (messenger-known-agents (the-messenger))))
+        (agents-table (known-agents-roster (the-known-agents))))
     (when receiver
       (bt:destroy-thread receiver))
     (when receive-socket
@@ -211,32 +183,9 @@
                  (cl-store:store obj out))))
     data))
 
-;;; (type-of (object->bytes (list :list 1 "two" 3)))
 
 (defmethod bytes->object ((bytes vector))
   (flexi-streams::with-input-from-sequence (in bytes)
     (cl-store:restore in)))
 
-;;; (bytes->object (object->bytes (list :list 1 "two" 3)))
 
-;;; (start-messaging)
-;;; (defparameter $msg1 (make-instance 'singleton-message :operation nil :data '(1 2 3)))
-;;; (defparameter $msg2 (make-instance 'singleton-message :operation :ping))
-;;; (send-message $msg1 *localhost* *message-receive-port*)
-;;; (send-message $msg2 *localhost* *message-receive-port*)
-;;; (send-message $msg1 *localhost* *message-receive-port* :default-recipient)
-;;; (send-message $msg1 "192.168.0.78" *message-receive-port*)
-;;; (send-message $msg2 "192.168.0.159" *message-receive-port*)
-;;; (describe (messenger-receive-queue (the-messenger)))
-;;; (describe (messenger-send-queue (the-messenger)))
-;;; (describe (the-messenger))
-;;; (stop-messaging)
-
-;;; (setf $rmsg1 (queues:qpop (messenger-receive-queue (the-messenger))))
-;;; (setf $rmsg2 (queues:qpop (messenger-receive-queue (the-messenger))))
-;;; (describe $rmsg1)
-;;; (describe $rmsg2)
-;;; (describe (envelope-contents $rmsg1))
-;;; (describe (envelope-contents $rmsg2))
-
-;;; (messenger-known-agents (the-messenger))

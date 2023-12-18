@@ -18,9 +18,6 @@
     (find-if-not (lambda (addr)(equalp addr #(127 0 0 1)))
                  addresses)))
 
-#+nil (get-ip-address)
-
-
 (defun nodebits ()
   ;; the low-order 10 bits of the machine's private IP address
   (let* ((address (get-ip-address))
@@ -33,14 +30,11 @@
                               #b1111111111)))
     (logand address-integer #b1111111111)))
 
-#+nil (nodebits)
 
 (defun timestamp-milliseconds ()
   "Returns the number of milliseconds elapsed since 1 January 2010 00:00:00 UTC."
   (- (get-universal-time) +apis-epoch+))
 
-#+nil
-(timestamp-milliseconds)
 
 (defun makeid ()
   (let* ((nodebits (nodebits))
@@ -51,7 +45,3 @@
             (ash nodebits 12)
             random-bits)))
 
-
-
-;;; (time (makeid))
-;;; (integer-length (makeid))

@@ -23,7 +23,7 @@
   :description "Apis: swarms of threads and processes passing messages"
   :author "mikel evins <mevins@me.com>"
   :license "MIT"
-  :version "0.3.3"
+  :version "0.4.0"
   :depends-on (:usocket
                :ip-interfaces
                :cl-store

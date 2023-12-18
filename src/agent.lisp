@@ -10,7 +10,17 @@
 
 (in-package #:apis)
 
+;;; ---------------------------------------------------------------------
+;;; *agent-lock*
+;;; ---------------------------------------------------------------------
+;;; controls concurrent access to agents
+
 (defparameter *agent-lock* (bt:make-lock))
+
+;;; ---------------------------------------------------------------------
+;;; CLASS agent
+;;; ---------------------------------------------------------------------
+;;; represents agents and agent processes
 
 (defclass agent ()
   ((id :reader agent-id :initform (makeid) :initarg :id)
@@ -41,7 +51,7 @@
   (handle-message agent (envelope-contents env)))
 
 (defmethod handle-message ((agent agent) msg)
-  (log:info "Agent ~S received unrecognized message: ~S"
+  (log:info t "Agent ~S received unrecognized message: ~S"
             agent (with-output-to-string (s)
                     (describe msg s))))
 
@@ -70,22 +80,47 @@
 (defmethod agent-running? ((agent agent))
   (and (agent-event-process agent) t))
 
-(defmethod deliver-message (msg (agent agent))
+(defmethod deliver-message-to-agent (msg (agent agent))
   (bt:with-lock-held (*agent-lock*)
     (queues:qpush (agent-message-queue agent) msg)
     (bt:condition-notify (agent-message-ready? agent))))
 
-;;; (defparameter $a (make-instance 'agent))
-;;; (defparameter $b (make-instance 'agent))
-;;; (describe $a)
-;;; (describe $b)
-;;; (start-agent $a)
-;;; (start-agent $b)
-;;; (deliver-message (vector 1) $a)
-;;; (deliver-message (vector 2) $b)
-;;; (deliver-message (vector 1 2) $a)
-;;; (deliver-message (vector 1 2 3) $a)
-;;; (stop-agent $a)
-;;; (stop-agent $b)
-;;; (queues:qsize (agent-message-queue $a))
-;;; (queues:qsize (agent-message-queue $b))
+
+;;; ---------------------------------------------------------------------
+;;; SINGLETON-CLASS known-agents
+;;; ---------------------------------------------------------------------
+;;; keeps track of known agents for messaging and management purposes
+
+(defclass known-agents ()
+  ((roster :reader known-agents-roster :initform (make-hash-table :test 'eql)))
+  (:metaclass singleton-classes:singleton-class))
+
+(defun the-known-agents ()(make-instance 'known-agents))
+
+(defmethod find-known-agent ((name symbol))
+  (gethash name (known-agents-roster (the-known-agents)) nil))
+
+(defun list-known-agents ()
+  (loop for key being the hash-keys in (known-agents-roster (the-known-agents))
+     collect key))
+
+(defun list-running-agents ()
+  (let ((found nil))
+    (loop for key being the hash-keys in (known-agents-roster (the-known-agents))
+       using (hash-value val)
+       do (when (agent-running? val)
+            (pushnew key found)))
+    found))
+
+(defmethod define-known-agent ((name symbol)(agent agent))
+  (let ((old-agent (find-known-agent name)))
+    (when old-agent (stop-agent old-agent)))
+  (setf (gethash name (known-agents-roster (the-known-agents)))
+        agent)
+  agent)
+
+(defmethod remove-known-agent ((name symbol))
+  (let ((old-agent (find-known-agent name)))
+    (when old-agent (stop-agent old-agent)))
+  (remhash name (known-agents-roster (the-known-agents)))
+  name)
