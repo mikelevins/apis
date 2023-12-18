@@ -31,7 +31,7 @@
 #+nil (stop-messaging)
 
 
-;;; agent message delivery
+;;; agents and message delivery
 ;;; ---------------------------------------------------------------------
 
 #+nil (start-messaging)
@@ -50,3 +50,6 @@
 #+nil (stop-agent $b)
 #+nil (queues:qsize (agent-message-queue $a))
 #+nil (queues:qsize (agent-message-queue $b))
+#+nil (list-known-agents)
+#+nil (list-running-agents)
+#+nil (list-stopped-agents)

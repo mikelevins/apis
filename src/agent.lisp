@@ -112,6 +112,14 @@
             (pushnew key found)))
     found))
 
+(defun list-stopped-agents ()
+  (let ((found nil))
+    (loop for key being the hash-keys in (known-agents-roster (the-known-agents))
+       using (hash-value val)
+       do (when (not (agent-running? val))
+            (pushnew key found)))
+    found))
+
 (defmethod define-known-agent ((name symbol)(agent agent))
   (let ((old-agent (find-known-agent name)))
     (when old-agent (stop-agent old-agent)))
