@@ -16,7 +16,10 @@
    #:*log-level*
    #:+log-levels+
    #:debug
-   #:info))
+   #:disable-logging
+   #:enable-logging
+   #:info
+   #:logging-enabled?))
 
 (in-package :log)
 
@@ -27,12 +30,24 @@
 ;;;  :info - info messages are printed
 ;;;  :debug - info and debug messages are printed
 
+(defparameter *logging-enabled* nil)
 (defparameter *log-level* :info)
 
+(defun enable-logging ()
+  (setf *logging-enabled* t))
+
+(defun disable-logging ()
+  (setf *logging-enabled* nil))
+
+(defun logging-enabled? ()
+  *logging-enabled*)
+
 (defun info (stream format-string &rest args)
-  (when (member *log-level* '(:info :debug) :test 'eql)
+  (when (and *logging-enabled*
+             (member *log-level* '(:info :debug) :test 'eql))
     (apply 'format stream format-string args)))
 
 (defun debug (stream format-string &rest args)
-  (when (eql :debug *log-level*)
+  (when (and *logging-enabled*
+             (eql :debug *log-level*))
     (apply 'format stream format-string args)))
