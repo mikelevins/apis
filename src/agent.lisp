@@ -38,7 +38,7 @@
     (log:info stream "~A" (agent-name obj))))
 
 (defmethod handle-message-operation ((agent agent) (msg message) op)
-  (log:info t "~%Agent ~S received message:~%  ~S" agent msg))
+  (log:info t "~%Agent ~S received message:~%  ~S~%" agent msg))
 
 (defmethod handle-message-operation ((agent agent) (msg message)(op (eql :ping)))
   (log:info t "~%Agent ~S received :ping" agent))
