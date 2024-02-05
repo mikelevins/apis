@@ -22,14 +22,15 @@
   ;; the low-order 10 bits of the machine's private IP address
   (let* ((address (get-ip-address))
          (address-integer (if address
-                              (reduce #'(lambda (n byte)
-                                          (+ (* n 255) byte))
-                                      address
-                                      :initial-value 0)
+                              (+ (ash (elt address 0) 24)
+                                 (ash (elt address 1) 16)
+                                 (ash (elt address 2) 8)
+                                 (elt address 3))
                               ;; if we can't get an IP we just use 1023
                               #b1111111111)))
     (logand address-integer #b1111111111)))
 
+#+nil (nodebits)
 
 (defun timestamp-milliseconds ()
   "Returns the number of milliseconds elapsed since 1 January 2010 00:00:00 UTC."
@@ -45,3 +46,4 @@
             (ash nodebits 12)
             random-bits)))
 
+#+nil (makeid)
