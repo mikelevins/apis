@@ -10,7 +10,10 @@
 
 (in-package #:apis)
 
-(setf cl:*random-state* (make-random-state t))
+(defparameter +prng+
+  (let ((prng (ironclad:make-prng :fortuna)))
+    (crypto:read-os-random-seed :random prng)
+    prng))
 
 (defparameter *session-id-counter* 0)
 (defparameter +max-session-id-counter+ #b1111111111111111)

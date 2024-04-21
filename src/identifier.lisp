@@ -25,7 +25,7 @@
                (loop until (not (= time (get-universal-time)))))
         (incf *session-id-counter*))
     (let ((time-bits (low-n-bits 24 (get-universal-time)))
-          (random-bits (random #b111111111111111111111111)))
+          (random-bits (ironclad:strong-random #b111111111111111111111111)))
       (+ random-bits
          (ash *session-id-counter* 24)
          (ash time-bits 40)))))
