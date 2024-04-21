@@ -9,7 +9,7 @@
 ;;;; ***********************************************************************
 
 (defpackage #:apis
-  (:use #:cl)
+  (:use #:cl #:org.tfeb.hax.singleton-classes)
   (:export
    #:*agent-lock*
    #:*last-local-message-delivery*

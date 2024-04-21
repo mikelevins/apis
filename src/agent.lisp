@@ -35,13 +35,13 @@
 
 (defmethod print-object ((obj agent) stream)
   (print-unreadable-object (obj stream :type t :identity nil)
-    (log:info stream "~A" (agent-name obj))))
+    (format stream "~A" (agent-name obj))))
 
 (defmethod handle-message-operation ((agent agent) (msg message) op)
-  (log:info t "~%Agent ~S received message:~%  ~S~%" agent msg))
+  (format t "~%Agent ~S received message:~%  ~S~%" agent msg))
 
 (defmethod handle-message-operation ((agent agent) (msg message)(op (eql :ping)))
-  (log:info t "~%Agent ~S received :ping" agent))
+  (format t "~%Agent ~S received :ping" agent))
 
 (defmethod handle-message ((agent agent) (msg message))
   (let ((op (message-operation msg)))
@@ -51,7 +51,7 @@
   (handle-message agent (envelope-contents env)))
 
 (defmethod handle-message ((agent agent) msg)
-  (log:info t "Agent ~S received unrecognized message: ~S"
+  (format t "Agent ~S received unrecognized message: ~S"
             agent (with-output-to-string (s)
                     (describe msg s))))
 
@@ -93,7 +93,7 @@
 
 (defclass known-agents ()
   ((roster :reader known-agents-roster :initform (make-hash-table :test 'eql)))
-  (:metaclass singleton-classes:singleton-class))
+  (:metaclass singleton-class))
 
 (defun the-known-agents ()(make-instance 'known-agents))
 

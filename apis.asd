@@ -23,22 +23,21 @@
   :description "Apis: swarms of threads and processes passing messages"
   :author "mikel evins <mevins@me.com>"
   :license "MIT"
-  :version "0.5.0"
-  :depends-on (:usocket
-               :ip-interfaces
-               :cl-store
-               :cl-base64
-               :queues 
-               :queues.simple-cqueue
-               :flexi-streams
-               :singleton-classes
-               :local-time
-               :net.bardcode.literals)
+  :version "0.6.0"
+  :depends-on (:usocket ; [MIT] https://github.com/usocket/usocket
+               :cl-store ; [BSD] https://github.com/skypher/cl-store
+               :cl-base64 ; [BSD] https://github.com/darabi/cl-base64
+               :queues ; [MIT] https://github.com/oconnore/queues 
+               :queues.simple-cqueue ; [MIT] https://github.com/oconnore/queues 
+               :flexi-streams ; [BSD] https://github.com/edicl/flexi-streams
+               :org.tfeb.hax.singleton-classes ; [MIT] https://github.com/tfeb/tfeb-lisp-hax
+               :local-time ; [MIT] https://github.com/dlowe-net/local-time?tab=License-1-ov-file#readme
+               :net.bardcode.literals ; [Apache 2.0] https://github.com/mikelevins/net.bardcode.literals
+               )
   :components ((:module "src"
                 :serial t
                 :components ((:file "package")
                              (:file "parameters")
-                             (:file "logging")
                              (:file "identifier")
                              (:file "message")
                              (:file "envelope")

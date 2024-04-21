@@ -38,7 +38,7 @@
    (send-buffer :accessor messenger-send-buffer :initform nil)
    (default-recipient :accessor messenger-default-recipient
      :initform (make-instance 'agent :name :default-recipient)))
-  (:metaclass singleton-classes:singleton-class))
+  (:metaclass singleton-class))
 
 (defmethod initialize-instance :after ((messenger messenger)
                                        &rest inits &key &allow-other-keys)
