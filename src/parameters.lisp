@@ -13,4 +13,4 @@
 (setf cl:*random-state* (make-random-state t))
 
 (defparameter *session-id-counter* 0)
-(defparameter +max-session-id-counter+ #b111111111111)
+(defparameter +max-session-id-counter+ #b1111111111111111)
