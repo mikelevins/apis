@@ -30,22 +30,5 @@
               (message-operation obj)
               (message-data obj)))))
 
-
-;;; a singleton message is a one-shot, asynchronous, fire-and-forget message
-;;; once sent, it's forgotten. best used for updates that can safely be
-;;; lost.
-(defclass singleton-message (message)
-  ((id :reader message-id :initform (makeid) :initarg :id)))
-
-
-;;; a protocol message is an element of a protocol exchange. a protocol exchange
-;;; requires a certain specified sequence of messages between participants.
-;;; each agent maintains a log of protocol messages sent and received so that
-;;; if a message is dropped it can be resent, and so that when messages
-;;; arrive out of order they can be properly reordered.
-(defclass protocol-message (message)
-  ((protocol :reader message-protocol :initform nil :initarg :protocol)
-   (session-id :reader message-session-id :initform (makeid) :initarg :session-id)
-   (sequence-number :reader message-sequence-number :initform nil :initarg :sequence-number)))
-
+#+nil (defparameter $msg1 (make-instance 'message))
 
