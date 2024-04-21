@@ -23,9 +23,10 @@
   :description "Apis: swarms of threads and processes passing messages"
   :author "mikel evins <mevins@me.com>"
   :license "MIT"
-  :version "0.6.0"
+  :version "0.6.1" ; improved ids
   :depends-on (:usocket ; [MIT] https://github.com/usocket/usocket
                :cl-store ; [BSD] https://github.com/skypher/cl-store
+               :ironclad ; [BSD] https://github.com/sharplispers/ironclad
                :cl-base64 ; [BSD] https://github.com/darabi/cl-base64
                :queues ; [MIT] https://github.com/oconnore/queues 
                :queues.simple-cqueue ; [MIT] https://github.com/oconnore/queues 
@@ -38,6 +39,7 @@
                 :serial t
                 :components ((:file "package")
                              (:file "parameters")
+                             (:file "utils")
                              (:file "identifier")
                              (:file "message")
                              (:file "envelope")
