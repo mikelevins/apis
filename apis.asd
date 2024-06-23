@@ -23,9 +23,12 @@
   :author "mikel evins <mevins@me.com>"
   :license "MIT"
   :version (:read-file-form "version.lisp")
-  :depends-on ()
+  :depends-on (:local-time ; [MIT] https://github.com/dlowe-net/local-time
+               :net.bardcode.ulid ; [Apache 2.0] https://github.com/mikelevins/net.bardcode.ulid
+               )
   :components ((:module "src"
-                :serial t
-                :components ((:file "package")))))
+                        :serial t
+                        :components ((:file "package")
+                                     (:file "parameters")))))
 
-;;; (asdf:load-system :apis)
+;;; (ql:quickload :apis)

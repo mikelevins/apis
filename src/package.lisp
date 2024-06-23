@@ -8,6 +8,6 @@
 ;;;;
 ;;;; ***********************************************************************
 
-(defpackage #:apis
+(defpackage #:net.bardcode.apis
   (:use #:cl)
   (:export))
