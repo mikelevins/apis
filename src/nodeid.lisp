@@ -15,8 +15,12 @@
 ;;; ABOUT
 ;;; ---------------------------------------------------------------------
 ;;; Apis uses these v4uuid values as node identifiers. A node is a
-;;; user account on a device that runs apis. The first time apis runs
-;;; it generates and deposits a nodeid in a platform-specific directory.
+;;; user account on a device that runs apis. Each message is identified
+;;; by a 128-bit nodeid, a 64-bit session id, and a 64-bit messageid.
+;;; Taken together these ids uniquely identify each message.
+;;;
+;;; The first time apis runs it generates and deposits a nodeid in a
+;;; platform-specific directory.
 ;;;
 ;;; The location of the directory conforms to the XDG standard as follows:
 ;;; 

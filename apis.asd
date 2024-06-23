@@ -27,6 +27,8 @@
                         :serial t
                         :components ((:file "package")
                                      (:file "parameters")
-                                     (:file "nodeid")))))
+                                     (:file "nodeid")
+                                     (:file "sessionid")
+                                     (:file "messageid")))))
 
 ;;; (ql:quickload :apis)
