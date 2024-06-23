@@ -10,10 +10,5 @@
 
 (in-package #:net.bardcode.apis)
 
-(defparameter +prng+
-  (let ((prng (ironclad:make-prng :fortuna)))
-    (crypto:read-os-random-seed :random prng)
-    prng))
-
-(defparameter *session-id-counter* 0)
-(defparameter +max-session-id-counter+ #b1111111111111111)
+(defparameter *uuid-random-state*
+  (make-random-state t))
