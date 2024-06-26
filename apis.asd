@@ -32,4 +32,5 @@
                                      (:file "sessionid")
                                      (:file "messageid")))))
 
+;;; (asdf:load-system :apis)
 ;;; (ql:quickload :apis)

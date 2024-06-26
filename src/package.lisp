@@ -10,4 +10,5 @@
 
 (defpackage #:net.bardcode.apis
   (:use #:cl)
+  (:nicknames :apis)
   (:export))
