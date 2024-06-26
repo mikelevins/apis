@@ -13,6 +13,17 @@
 ;;; ---------------------------------------------------------------------
 ;;; ABOUT
 ;;; ---------------------------------------------------------------------
-;;; Apis uses these 64-bit integer values as message identifiers. Each
-;;; sets *next-message-id* to 0 and creates a singleton agent that
-;;; dispenses monotonically-increasing messageids.
+;;; Apis uses these 64-bit integer values as message identifiers.
+;;; Each session sets *next-message-id* to zero at startup, then
+;;; increments and returns an id each time one is requested.
+
+(let ((*next-message-id* 0))
+  (defun last-message-id ()
+    *next-message-id*)
+  (defun next-message-id ()
+    (incf *next-message-id*))
+  (defun reset-message-id ()
+    (setf *next-message-id* 0)
+    (values)))
+
+#+nil (next-message-id)

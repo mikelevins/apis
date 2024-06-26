@@ -36,3 +36,11 @@
           (fuuid:from-string uuid-string)
           (error "Not a string: ~S" uuid-string))
       (fuuid:to-string (fuuid:make-v1))))
+
+;;; TODO: add a persistence mechanism
+;;;       until then, just generate random ones
+
+(defun this-nodeid ()
+  (make-nodeid))
+
+#+nil (this-nodeid)

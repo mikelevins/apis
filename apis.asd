@@ -30,7 +30,8 @@
                                      (:file "parameters")
                                      (:file "nodeid")
                                      (:file "sessionid")
-                                     (:file "messageid")))))
+                                     (:file "messageid")
+                                     (:file "message")))))
 
 ;;; (asdf:load-system :apis)
 ;;; (ql:quickload :apis)
