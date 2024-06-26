@@ -22,6 +22,7 @@
   :license "MIT"
   :version (:read-file-form "version.lisp")
   :depends-on (:local-time ; [MIT] https://github.com/dlowe-net/local-time
+               :frugal-uuid ; [MIT] https://github.com/ak-coram/cl-frugal-uuid
                )
   :components ((:module "src"
                         :serial t

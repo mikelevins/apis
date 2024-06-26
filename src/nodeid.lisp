@@ -14,7 +14,7 @@
 ;;; ---------------------------------------------------------------------
 ;;; ABOUT
 ;;; ---------------------------------------------------------------------
-;;; Apis uses these v4uuid values as node identifiers. A node is a
+;;; Apis uses v4uuid values as node identifiers. A node is a
 ;;; user account on a device that runs apis. Each message is identified
 ;;; by a 128-bit nodeid, a 64-bit session id, and a 64-bit messageid.
 ;;; Taken together these ids uniquely identify each message.
@@ -30,44 +30,9 @@
 ;;; | macOS            | $HOME/Library/Preferences/apis/nodeid | $HOME/Library/apis/nodeid      |
 ;;; | Windows          | %APPDATA%\apis/nodeid                 | %APPDATA%\apis/nodeid          |
 
-(defmethod deposit-v4-uuid-version ((int integer))
-  (let ((int2 (dpb #b0100 (byte 4 76) int)))
-    (dpb #b10 (byte 2 62) int2)))
-
-#+nil (v4-uuid-bits->hex (dpb #b00 (byte 4 76) #xffffffffffffffffffffffffffffffff))
-#+nil (v4-uuid-bits->hex (dpb #b10 (byte 2 62) #xffffffffffffffffffffffffffffffff))
-
-(defun generate-128-random-bits ()
-  (random #xffffffffffffffffffffffffffffffff *uuid-random-state*))
-
-(defun generate-v4-uuid-bits ()
-  (deposit-v4-uuid-version (generate-128-random-bits)))
-
-#+nil (defparameter $bits (generate-v4-uuid-bits))
-#+nil (format t "~%~(~x~)" $bits)
-#+nil (length (format nil "~(~x~)" $bits))
-
-(defmethod v4-uuid-bits->hex ((id integer))
-  (format nil "~(~32,'0x~)" id))
-
-#+nil (length (v4-uuid-bits->hex (generate-v4-uuid-bits)))
-
-(defmethod v4-uuid-bits->uuid-string ((id-bits integer))
-  (let* ((hex (v4-uuid-bits->hex id-bits)))
-    (format nil "~A-~A-~A-~A-~A"
-            (subseq hex 0 8)
-            (subseq hex 8 12)
-            (subseq hex 12 16)
-            (subseq hex 16 20)
-            (subseq hex 20))))
-
-
-(defun make-nodeid (&optional int)
-  (if int
-      (progn (assert (typep int '(integer 0 #xfffffffffffffffffffffffffffffffe))()
-                     "int must be an integer between 0 and ~D" #xfffffffffffffffffffffffffffffffe)
-             (v4-uuid-bits->uuid-string (deposit-v4-uuid-version int)))
-      (v4-uuid-bits->uuid-string (generate-v4-uuid-bits))))
-
-#+nil (make-nodeid)
-#+nil (make-nodeid 1111)
+(defun make-nodeid (&optional (uuid-string nil))
+  (if uuid-string
+      (if (stringp uuid-string)
+          (fuuid:from-string uuid-string)
+          (error "Not a string: ~S" uuid-string))
+      (fuuid:to-string (fuuid:make-v1))))
