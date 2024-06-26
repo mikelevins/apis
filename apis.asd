@@ -23,6 +23,7 @@
   :version (:read-file-form "version.lisp")
   :depends-on (:local-time ; [MIT] https://github.com/dlowe-net/local-time
                :frugal-uuid ; [MIT] https://github.com/ak-coram/cl-frugal-uuid
+               :queues.simple-cqueue ; [MIT] https://github.com/oconnore/queues
                )
   :components ((:module "src"
                         :serial t
@@ -31,7 +32,9 @@
                                      (:file "nodeid")
                                      (:file "sessionid")
                                      (:file "messageid")
-                                     (:file "message")))))
+                                     (:file "message")
+                                     (:file "agent")
+                                     (:file "messenger")))))
 
 ;;; (asdf:load-system :apis)
 ;;; (ql:quickload :apis)

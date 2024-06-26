@@ -17,3 +17,7 @@
 
 (defparameter *session-id-counter* 0)
 (defparameter +max-session-id-counter+ #b1111111111111111)
+
+(defparameter *localhost* "127.0.0.1")
+(defparameter *message-receive-port* 10764)
+(defparameter *maximum-buffer-size* 32767)
