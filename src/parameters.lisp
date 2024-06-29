@@ -10,5 +10,6 @@
 
 (in-package #:net.bardcode.apis)
 
-(defparameter *uuid-random-state*
-  (make-random-state t))
+(defparameter *uuid-random-state* (make-random-state t))
+(defparameter *message-receive-port* 10764)
+(defparameter *maximum-buffer-size* 32767)

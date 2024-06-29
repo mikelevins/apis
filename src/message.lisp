@@ -38,3 +38,6 @@
               (message-arguments obj)))))
 
 #+nil (defparameter $msg1 (make-instance 'message))
+#+nil (describe $msg1)
+#+nil (defparameter $msg2 (make-instance 'message))
+#+nil (describe $msg2)

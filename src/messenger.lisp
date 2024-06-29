@@ -20,4 +20,14 @@
    (local-delivery-process :accessor messenger-local-delivery-process :initform nil)
    (sender-process :accessor messenger-sender-process :initform nil)
    (send-queue :accessor messenger-send-queue :initform nil)
-   (send-buffer :accessor messenger-send-buffer :initform nil)))
+   (send-buffer :accessor messenger-send-buffer :initform nil))
+  (:metaclass singleton-class))
+
+(defun the-messenger ()
+  (make-instance 'messenger))
+
+(defun reset-the-messenger ()
+  (reset-singleton-class (find-class 'messenger)))
+
+#+nil (describe (the-messenger))
+#+nil (reset-the-messenger)

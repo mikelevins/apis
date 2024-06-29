@@ -21,8 +21,10 @@
   :author "mikel evins <mevins@me.com>"
   :license "MIT"
   :version (:read-file-form "version.lisp")
-  :depends-on (:local-time ; [MIT] https://github.com/dlowe-net/local-time
+  :depends-on (
+               :closer-mop ; [MIT] https://github.com/pcostanza/closer-mop
                :frugal-uuid ; [MIT] https://github.com/ak-coram/cl-frugal-uuid
+               :local-time ; [MIT] https://github.com/dlowe-net/local-time
                :queues.simple-cqueue ; [MIT] https://github.com/oconnore/queues
                )
   :components ((:module "src"
@@ -30,6 +32,7 @@
                         :components ((:file "package")
                                      (:file "parameters")
                                      (:file "nodeid")
+                                     (:file "singleton-class")
                                      (:file "sessionid")
                                      (:file "messageid")
                                      (:file "message")

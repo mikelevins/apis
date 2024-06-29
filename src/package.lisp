@@ -9,6 +9,6 @@
 ;;;; ***********************************************************************
 
 (defpackage #:net.bardcode.apis
-  (:use #:cl)
+  (:use #:cl #:frugal-uuid :local-time :queues)
   (:nicknames :apis)
   (:export))
