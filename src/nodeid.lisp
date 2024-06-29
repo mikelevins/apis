@@ -40,7 +40,12 @@
 ;;; TODO: add a persistence mechanism
 ;;;       until then, just generate random ones
 
-(defun this-nodeid ()
+(defparameter *this-nodeid*
   (make-nodeid))
+
+(defun this-nodeid ()
+  (unless *this-nodeid*
+    (setf *this-nodeid* (make-nodeid)))
+  *this-nodeid*)
 
 #+nil (this-nodeid)

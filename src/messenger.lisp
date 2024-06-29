@@ -26,8 +26,37 @@
 (defun the-messenger ()
   (make-instance 'messenger))
 
+(defun start-messaging ()
+  (setf (messenger-receive-queue (the-messenger))
+        (make-instance 'simple-cqueue)))
+
+(defun stop-messaging ()
+  (setf (messenger-receive-queue (the-messenger)) nil))
+
 (defun reset-the-messenger ()
-  (reset-singleton-class (find-class 'messenger)))
+  (stop-messaging)
+  (reset-singleton-class (find-class 'messenger))
+  (start-messaging))
 
 #+nil (describe (the-messenger))
 #+nil (reset-the-messenger)
+
+(defun deliver-message-locally (message)
+  (let ((destination (destination-agent message)))
+    (if (or (null destination)
+            (eq destination (the-messenger)))
+        (qpush (messenger-receive-queue (the-messenger)) message)
+        (qpush (agent-message-queue destination) message))))
+
+(defun deliver-message-remotely (message)
+  (format t "Not yet implemented: remote delivery ~S" message))
+
+(defmethod send-message ((message message))
+  (let ((destination-host (destination-host message)))
+    (if (member destination-host '(nil "localhost" "127.0.0.1") :test 'equal)
+        (deliver-message-locally message)
+        (deliver-message-remotely message))))
+
+#+nil (stop-messaging)
+#+nil (start-messaging)
+#+nil (send-message (message :destination-agent (the-messenger)))

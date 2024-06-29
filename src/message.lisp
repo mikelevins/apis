@@ -15,7 +15,6 @@
 ;;; ---------------------------------------------------------------------
 ;;; the data transmitted from agent to agent
 
-(defparameter *default-message-time-to-live* 600) ; seconds
 
 (defclass message ()
   ((operation :reader message-operation :initform :ping :initarg :operation)
@@ -32,10 +31,29 @@
 (defmethod print-object ((obj message) out-stream)
   (print-unreadable-object (obj out-stream :type t :identity nil)
     (let ((timestamp (message-timestamp obj)))
-      (format out-stream "~A: ~S ~S"
+      (format out-stream "~A (~S): ~S ~S"
               (message-id obj)
+              timestamp
               (message-operation obj)
               (message-arguments obj)))))
+
+
+(defun message (&key
+                  operation arguments timestamp time-to-live nodeid sessionid
+                  id destination-host destination-port destination-agent)
+  (make-instance 'message
+                 :operation (or operation :ping)
+                 :arguments arguments
+                 :timestamp (or timestamp (now))
+                 :time-to-live (or time-to-live *default-message-time-to-live*)
+                 :nodeid (or nodeid (this-nodeid))
+                 :sessionid (or sessionid (get-session-id))
+                 :id (or id (next-message-id))
+                 :destination-host destination-host
+                 :destination-port (or destination-port *message-receive-port*)
+                 :destination-agent destination-agent))
+
+
 
 #+nil (defparameter $msg1 (make-instance 'message))
 #+nil (describe $msg1)

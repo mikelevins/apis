@@ -12,4 +12,5 @@
 
 (defparameter *uuid-random-state* (make-random-state t))
 (defparameter *message-receive-port* 10764)
-(defparameter *maximum-buffer-size* 32767)
+(defparameter *maximum-messenger-buffer-size* 32767)
+(defparameter *default-message-time-to-live* 600) ; seconds
