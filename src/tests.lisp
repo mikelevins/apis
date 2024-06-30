@@ -5,9 +5,6 @@
 ;;; identifiers
 ;;; ---------------------------------------------------------------------
 
-#+nil (get-ip-address)
-#+nil (nodebits)
-#+nil (timestamp-milliseconds)
 #+nil (time (makeid))
 #+nil (integer-length (makeid))
 
@@ -18,8 +15,8 @@
 #+nil (type-of (object->bytes (list :list 1 "two" 3)))
 #+nil (bytes->object (object->bytes (list :list 1 "two" 3)))
 #+nil (start-messaging)
-#+nil (defparameter $msg1 (make-instance 'singleton-message :operation nil :data '(1 2 3)))
-#+nil (defparameter $msg2 (make-instance 'singleton-message :operation :ping))
+#+nil (defparameter $msg1 (make-instance 'message :operation nil :data '(1 2 3)))
+#+nil (defparameter $msg2 (make-instance 'message :operation :ping))
 #+nil (send-message $msg1 *localhost* *message-receive-port*)
 #+nil (send-message $msg2 *localhost* *message-receive-port*)
 #+nil (send-message $msg1 *localhost* *message-receive-port* :default-recipient)

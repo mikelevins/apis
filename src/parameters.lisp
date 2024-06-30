@@ -2,16 +2,22 @@
 ;;;;
 ;;;; Name:          parameters.lisp
 ;;;; Project:       the apis message-passing system
-;;;; Purpose:       constants and variables that parameterize worker behavior
+;;;; Purpose:       constants and variables that paramterize agent behavior
 ;;;; Author:        mikel evins
 ;;;; Copyright:     2023 by mikel evins
 ;;;;
 ;;;; ***********************************************************************
 
-(in-package #:net.bardcode.apis)
+(in-package #:apis)
 
-(defparameter *uuid-random-state* (make-random-state t))
+(defparameter +prng+
+  (let ((prng (ironclad:make-prng :fortuna)))
+    (crypto:read-os-random-seed :random prng)
+    prng))
+
+(defparameter *session-id-counter* 0)
+(defparameter +max-session-id-counter+ #b1111111111111111)
+
+(defparameter *localhost* "127.0.0.1")
 (defparameter *message-receive-port* 10764)
-(defparameter *maximum-messenger-buffer-size* 32767)
-(defparameter *default-message-time-to-live* 600) ; seconds
-(defparameter *local-delivery-interval* 0.0125) ; seconds
+(defparameter *maximum-buffer-size* 32767)
