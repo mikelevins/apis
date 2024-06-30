@@ -26,9 +26,9 @@
   nil)
 
 (defmethod make-instance ((class singleton-class) &rest args &key)
-  (unless (instance class)
-    (setf (instance class)(call-next-method)))
-  (instance class))
+  (or (instance class)
+      (progn (setf (instance class)(call-next-method))
+             (instance class))))
 
 (defmethod reset-singleton-class ((class singleton-class))
   (setf (instance class)

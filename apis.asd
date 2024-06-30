@@ -30,13 +30,14 @@
   :components ((:module "src"
                         :serial t
                         :components ((:file "package")
+                                     (:file "utilities")
                                      (:file "parameters")
                                      (:file "nodeid")
                                      (:file "singleton-class")
                                      (:file "sessionid")
                                      (:file "messageid")
                                      (:file "message")
-                                     (:file "agent")
+                                     (:file "worker")
                                      (:file "messenger")))))
 
 ;;; (asdf:load-system :apis)

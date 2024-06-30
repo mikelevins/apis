@@ -13,7 +13,7 @@
 ;;; ---------------------------------------------------------------------
 ;;; message
 ;;; ---------------------------------------------------------------------
-;;; the data transmitted from agent to agent
+;;; the data transmitted from worker to worker
 
 
 (defclass message ()
@@ -26,7 +26,7 @@
    (messageid :reader message-id :initform (next-message-id) :initarg :id)
    (destination-host :reader destination-host :initform nil :initarg :destination-host)
    (destination-port :reader destination-port :initform nil :initarg :destination-port)
-   (destination-agent :reader destination-agent :initform nil :initarg :destination-agent)))
+   (destination-worker :reader destination-worker :initform nil :initarg :destination-worker)))
 
 (defmethod print-object ((obj message) out-stream)
   (print-unreadable-object (obj out-stream :type t :identity nil)
@@ -40,7 +40,7 @@
 
 (defun message (&key
                   operation arguments timestamp time-to-live nodeid sessionid
-                  id destination-host destination-port destination-agent)
+                  id destination-host destination-port destination-worker)
   (make-instance 'message
                  :operation (or operation :ping)
                  :arguments arguments
@@ -51,7 +51,7 @@
                  :id (or id (next-message-id))
                  :destination-host destination-host
                  :destination-port (or destination-port *message-receive-port*)
-                 :destination-agent destination-agent))
+                 :destination-worker destination-worker))
 
 
 
