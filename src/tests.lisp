@@ -22,6 +22,7 @@
 #+nil (send-message $msg1 *localhost* *message-receive-port* :default-recipient)
 
 #+nil (send-message $msg1 "192.168.0.51" *message-receive-port*)
+#+nil (send-message $msg1 "192.168.0.159" *message-receive-port*)
 #+nil (send-message $msg2 "192.168.0.159" *message-receive-port*)
 #+nil (describe (messenger-receive-queue (the-messenger)))
 #+nil (describe (messenger-send-queue (the-messenger)))
