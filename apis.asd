@@ -22,7 +22,7 @@
   :serial t
   :description "Apis: swarms of threads and processes passing messages"
   :author "mikel evins <mevins@me.com>"
-  :license "MIT"
+  :license "Apache 2.0"
   :version (:read-file-form "version.lisp")
   :depends-on (:usocket ; [MIT] https://github.com/usocket/usocket
                :cl-store ; [BSD] https://github.com/skypher/cl-store
@@ -33,7 +33,7 @@
                :flexi-streams ; [BSD] https://github.com/edicl/flexi-streams
                :org.tfeb.hax.singleton-classes ; [MIT] https://github.com/tfeb/tfeb-lisp-hax
                :local-time ; [MIT] https://github.com/dlowe-net/local-time?tab=License-1-ov-file#readme
-               :net.bardcode.nodeid ; [MIT] https://github.com/mikelevins/net.bardcode.nodeid
+               :net.bardcode.nodeid ; [Apache 2.0] https://github.com/mikelevins/net.bardcode.nodeid
                :net.bardcode.literals ; [Apache 2.0] https://github.com/mikelevins/net.bardcode.literals
                )
   :components ((:module "src"

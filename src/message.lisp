@@ -31,4 +31,5 @@
               (message-data obj)))))
 
 #+nil (defparameter $msg1 (make-instance 'message))
+#+nil (describe $msg1)
 
