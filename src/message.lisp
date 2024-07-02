@@ -13,7 +13,7 @@
 ;;; ---------------------------------------------------------------------
 ;;; message
 ;;; ---------------------------------------------------------------------
-;;; the data transmitted from agent to agent
+;;; the data transmitted from worker to worker
 
 (defparameter *default-message-time-to-live* 600) ; seconds
 

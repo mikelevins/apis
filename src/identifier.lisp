@@ -2,7 +2,7 @@
 ;;;;
 ;;;; Name:          identifier.lisp
 ;;;; Project:       the apis message-passing system
-;;;; Purpose:       unique ids for agents and messages
+;;;; Purpose:       unique ids for workers and messages
 ;;;; Author:        mikel evins
 ;;;; Copyright:     2014 by mikel evins
 ;;;;

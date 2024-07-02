@@ -11,26 +11,26 @@
 (defpackage #:apis
   (:use #:cl #:org.tfeb.hax.singleton-classes)
   (:export
-   #:*agent-lock*
+   #:*worker-lock*
    #:*last-local-message-delivery*
-   #:agent
-   #:agent-event-process
-   #:agent-id
-   #:agent-message-queue
-   #:agent-message-ready?
-   #:agent-name
-   #:agent-running?
-   #:define-known-agent
+   #:worker
+   #:worker-event-process
+   #:worker-id
+   #:worker-message-queue
+   #:worker-message-ready?
+   #:worker-name
+   #:worker-running?
+   #:define-known-worker
    #:deliver-message
-   #:deliver-message-to-agent
+   #:deliver-message-to-worker
    #:envelope
    #:envelope-contents
-   #:find-known-agent
+   #:find-known-worker
    #:handle-message
    #:handle-message-operation
-   #:list-known-agents
-   #:list-running-agents
-   #:list-stopped-agents
+   #:list-known-workers
+   #:list-running-workers
+   #:list-stopped-workers
    #:makeid
    #:message
    #:message-data
@@ -38,13 +38,13 @@
    #:message-time-to-live
    #:message-timestamp
    #:messenger
-   #:messenger-known-agents
-   #:remove-known-agent
+   #:messenger-known-workers
+   #:remove-known-worker
    #:send-message
    #:singleton-message
-   #:start-agent
+   #:start-worker
    #:start-messaging
-   #:stop-agent
+   #:stop-worker
    #:stop-messaging
    #:the-messenger
    ))

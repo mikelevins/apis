@@ -44,7 +44,7 @@
                              (:file "identifier")
                              (:file "message")
                              (:file "envelope")
-                             (:file "agent")
+                             (:file "worker")
                              (:file "messenger")
                              ))))
 

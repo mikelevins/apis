@@ -2,7 +2,7 @@
 ;;;;
 ;;;; Name:          parameters.lisp
 ;;;; Project:       the apis message-passing system
-;;;; Purpose:       constants and variables that paramterize agent behavior
+;;;; Purpose:       constants and variables that paramterize worker behavior
 ;;;; Author:        mikel evins
 ;;;; Copyright:     2023 by mikel evins
 ;;;;

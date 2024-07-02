@@ -37,12 +37,12 @@
                          :initform (bt:make-condition-variable :name "send-queue-occupied?"))
    (send-buffer :accessor messenger-send-buffer :initform nil)
    (default-recipient :accessor messenger-default-recipient
-     :initform (make-instance 'agent :name :default-recipient)))
+     :initform (make-instance 'worker :name :default-recipient)))
   (:metaclass singleton-class))
 
 (defmethod initialize-instance :after ((messenger messenger)
                                        &rest inits &key &allow-other-keys)
-  (apis::start-agent (messenger-default-recipient messenger)))
+  (apis::start-worker (messenger-default-recipient messenger)))
 
 (defun the-messenger ()(make-instance 'messenger))
 
@@ -51,13 +51,13 @@
 (defun clear-messenger-buffers ()(clear-send-buffer)(clear-receive-buffer))
 
 
-(defun reset-default-recipient-agent ()
+(defun reset-default-recipient-worker ()
   (when (messenger-default-recipient (the-messenger))
-    (stop-agent (messenger-default-recipient (the-messenger))))
+    (stop-worker (messenger-default-recipient (the-messenger))))
   (setf (messenger-default-recipient (the-messenger))
-        (make-instance 'agent :name :default-recipient))
-  (unless (agent-running? (messenger-default-recipient (the-messenger)))
-    (start-agent (messenger-default-recipient (the-messenger)))))
+        (make-instance 'worker :name :default-recipient))
+  (unless (worker-running? (messenger-default-recipient (the-messenger)))
+    (start-worker (messenger-default-recipient (the-messenger)))))
 
 (defun run-receiver (socket)
   (loop
@@ -71,17 +71,17 @@
 (defparameter *last-local-message-delivery* nil)
 
 ;;; default delivery if the datum is not an envelope
-;;; (without an envelope we don't know that the destination agent is,
-;;; so we choose the default recipient agent)
+;;; (without an envelope we don't know that the destination worker is,
+;;; so we choose the default recipient worker)
 (defmethod deliver-message (datum)
-  (deliver-message-to-agent datum (messenger-default-recipient (the-messenger))))
+  (deliver-message-to-worker datum (messenger-default-recipient (the-messenger))))
 
 (defmethod deliver-message ((env envelope))
-  (let* ((destination-agent-name (envelope-destination-agent env))
-         (recipient (or (find-known-agent destination-agent-name)
+  (let* ((destination-worker-name (envelope-destination-worker env))
+         (recipient (or (find-known-worker destination-worker-name)
                         (messenger-default-recipient (the-messenger))))
          (contents (envelope-contents env)))
-    (deliver-message-to-agent contents recipient)
+    (deliver-message-to-worker contents recipient)
     (setf *last-local-message-delivery*
           (cons recipient env))))
 
@@ -112,7 +112,7 @@
                                 :port port))))))
 
 (defun start-messaging (&optional (port *message-receive-port*))
-  (let* ((agents-table (known-agents-roster (the-known-agents))))
+  (let* ((workers-table (known-workers-roster (the-known-workers))))
     (unless (messenger-receive-queue (the-messenger))
       (setf (messenger-receive-queue (the-messenger))
             (make-instance 'queues:simple-cqueue)))
@@ -142,19 +142,19 @@
                             :name (format nil "message sender"))))
     (unless (messenger-default-recipient (the-messenger))
       (setf (messenger-default-recipient (the-messenger))
-            (make-instance 'agent :name :default-recipient)))
-    (unless (agent-running? (messenger-default-recipient (the-messenger)))
-      (start-agent (messenger-default-recipient (the-messenger))))
-    (when agents-table
-      (loop for key being the hash-keys in agents-table
-         do (let ((agent (gethash key agents-table nil)))
-              (when agent (start-agent agent)))))))
+            (make-instance 'worker :name :default-recipient)))
+    (unless (worker-running? (messenger-default-recipient (the-messenger)))
+      (start-worker (messenger-default-recipient (the-messenger))))
+    (when workers-table
+      (loop for key being the hash-keys in workers-table
+         do (let ((worker (gethash key workers-table nil)))
+              (when worker (start-worker worker)))))))
 
 (defun stop-messaging ()
   (let ((receiver (shiftf (messenger-receiver-process (the-messenger)) nil))
         (receive-socket (messenger-receive-socket (the-messenger)))
         (sender (shiftf (messenger-sender-process (the-messenger)) nil))
-        (agents-table (known-agents-roster (the-known-agents))))
+        (workers-table (known-workers-roster (the-known-workers))))
     (when receiver
       (bt:destroy-thread receiver))
     (when receive-socket
@@ -163,19 +163,19 @@
     (when sender
       (bt:destroy-thread sender))
     (when (messenger-default-recipient (the-messenger))
-      (stop-agent (messenger-default-recipient (the-messenger)))
+      (stop-worker (messenger-default-recipient (the-messenger)))
       (setf (messenger-default-recipient (the-messenger)) nil))
-    (when agents-table
-      (loop for key being the hash-keys in agents-table
-         do (let ((agent (gethash key agents-table nil)))
-              (when agent (stop-agent agent)))))))
+    (when workers-table
+      (loop for key being the hash-keys in workers-table
+         do (let ((worker (gethash key workers-table nil)))
+              (when worker (stop-worker worker)))))))
 
-(defmethod send-message ((message message)(host string)(port integer) &optional (destination-agent nil))
+(defmethod send-message ((message message)(host string)(port integer) &optional (destination-worker nil))
   (let* ((envelope (make-instance 'envelope
                                   :contents message
                                   :destination-host host
                                   :destination-port port
-                                  :destination-agent destination-agent)))
+                                  :destination-worker destination-worker)))
     (queues::qpush (messenger-send-queue (the-messenger)) envelope)))
 
 (defun object->bytes (obj)

@@ -17,14 +17,14 @@
 (defclass envelope ()
   ((destination-host :reader envelope-destination-host :initform nil :initarg :destination-host)
    (destination-port :reader envelope-destination-port :initform nil :initarg :destination-port)
-   ;; the name of a known agent object available at the detination host and port
-   (destination-agent :reader envelope-destination-agent :initform nil :initarg :destination-agent)
+   ;; the name of a known worker object available at the detination host and port
+   (destination-worker :reader envelope-destination-worker :initform nil :initarg :destination-worker)
    (contents :reader envelope-contents :initform nil :initarg :contents)))
 
 (defmethod print-object ((obj envelope) out-stream)
   (print-unreadable-object (obj out-stream :type t :identity nil)
     (format out-stream "to: ~S@~A:~A"
-            (envelope-destination-agent obj)
+            (envelope-destination-worker obj)
             (envelope-destination-host obj)
             (envelope-destination-port obj))))
 
