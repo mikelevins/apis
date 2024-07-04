@@ -30,6 +30,9 @@
 
 ;;; messenger, remote delivery
 ;;; ---------------------------------------------------------------------
+;;; destinations:
+;;; - jupiter: "192.168.0.64"
+;;; - saturn: "192.168.0.159"
 
 ;;; to jupiter
 #+nil (defparameter $msg1 (make-instance 'message :operation nil :arguments '(1 2 3)
