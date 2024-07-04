@@ -101,7 +101,7 @@
                                 :port port))))))
 
 (defun start-messaging (&optional (port *message-receive-port*))
-  (let* ((workers-table (known-workers-roster (the-known-workers))))
+  (let* ((workers-table (published-workers-roster (the-published-workers))))
     (unless (messenger-receive-queue (the-messenger))
       (setf (messenger-receive-queue (the-messenger))
             (make-instance 'queues:simple-cqueue)))
@@ -143,7 +143,7 @@
   (let ((receiver (shiftf (messenger-receiver-process (the-messenger)) nil))
         (receive-socket (messenger-receive-socket (the-messenger)))
         (sender (shiftf (messenger-sender-process (the-messenger)) nil))
-        (workers-table (known-workers-roster (the-known-workers))))
+        (workers-table (published-workers-roster (the-published-workers))))
     (when receiver
       (bt:destroy-thread receiver))
     (when receive-socket
@@ -166,7 +166,6 @@
   (let* ((data (flexi-streams:with-output-to-sequence (out)
                  (cl-store:store obj out))))
     data))
-
 
 (defmethod bytes->object ((bytes vector))
   (flexi-streams::with-input-from-sequence (in bytes)

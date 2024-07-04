@@ -68,6 +68,4 @@
 #+nil (stop-worker $b)
 #+nil (queues:qsize (worker-message-queue $a))
 #+nil (queues:qsize (worker-message-queue $b))
-#+nil (list-known-workers)
-#+nil (list-running-workers)
-#+nil (list-stopped-workers)
+#+nil (list-published-workers)

@@ -26,7 +26,7 @@
    #:find-known-worker
    #:handle-message
    #:handle-message-operation
-   #:list-known-workers
+   #:list-published-workers
    #:list-running-workers
    #:list-stopped-workers
    #:makeid
@@ -36,7 +36,7 @@
    #:message-time-to-live
    #:message-timestamp
    #:messenger
-   #:messenger-known-workers
+   #:messenger-published-workers
    #:remove-known-worker
    #:send-message
    #:singleton-message

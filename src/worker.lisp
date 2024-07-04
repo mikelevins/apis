@@ -70,48 +70,32 @@
 
 
 ;;; ---------------------------------------------------------------------
-;;; SINGLETON-CLASS known-workers
+;;; SINGLETON-CLASS published-workers
 ;;; ---------------------------------------------------------------------
 ;;; keeps track of known workers for messaging and management purposes
 
-(defclass known-workers ()
-  ((roster :reader known-workers-roster :initform (make-hash-table :test 'eql)))
+(defclass published-workers ()
+  ((roster :reader published-workers-roster :initform (make-hash-table :test 'eql)))
   (:metaclass singleton-class))
 
-(defun the-known-workers ()(make-instance 'known-workers))
+(defun the-published-workers ()(make-instance 'published-workers))
 
 (defmethod find-known-worker ((name symbol))
-  (gethash name (known-workers-roster (the-known-workers)) nil))
+  (gethash name (published-workers-roster (the-published-workers)) nil))
 
-(defun list-known-workers ()
-  (loop for key being the hash-keys in (known-workers-roster (the-known-workers))
+(defun list-published-workers ()
+  (loop for key being the hash-keys in (published-workers-roster (the-published-workers))
      collect key))
-
-(defun list-running-workers ()
-  (let ((found nil))
-    (loop for key being the hash-keys in (known-workers-roster (the-known-workers))
-       using (hash-value val)
-       do (when (worker-running? val)
-            (pushnew key found)))
-    found))
-
-(defun list-stopped-workers ()
-  (let ((found nil))
-    (loop for key being the hash-keys in (known-workers-roster (the-known-workers))
-       using (hash-value val)
-       do (when (not (worker-running? val))
-            (pushnew key found)))
-    found))
 
 (defmethod define-known-worker ((name symbol)(worker worker))
   (let ((old-worker (find-known-worker name)))
     (when old-worker (stop-worker old-worker)))
-  (setf (gethash name (known-workers-roster (the-known-workers)))
+  (setf (gethash name (published-workers-roster (the-published-workers)))
         worker)
   worker)
 
 (defmethod remove-known-worker ((name symbol))
   (let ((old-worker (find-known-worker name)))
     (when old-worker (stop-worker old-worker)))
-  (remhash name (known-workers-roster (the-known-workers)))
+  (remhash name (published-workers-roster (the-published-workers)))
   name)
