@@ -11,13 +11,6 @@
 (in-package #:apis)
 
 ;;; ---------------------------------------------------------------------
-;;; *worker-lock*
-;;; ---------------------------------------------------------------------
-;;; controls concurrent access to workers
-
-(defparameter *worker-lock* (bt:make-lock))
-
-;;; ---------------------------------------------------------------------
 ;;; CLASS worker
 ;;; ---------------------------------------------------------------------
 ;;; represents workers and worker processes
@@ -25,7 +18,6 @@
 (defclass worker ()
   ((id :reader worker-id :initform (makeid) :initarg :id)
    (name :initform nil :initarg :name)
-   (message-ready? :reader worker-message-ready? :initform (bt:make-condition-variable))
    (message-queue :accessor worker-message-queue :initform (make-instance 'queues:simple-cqueue))
    (event-process :accessor worker-event-process :initform nil)))
 
@@ -56,13 +48,9 @@
   (bt:make-thread
    (lambda ()
      (loop
-        (bt:with-lock-held (*worker-lock*)
-          (loop for msg = (queues:qpop (worker-message-queue worker))
-             then (queues:qpop (worker-message-queue worker))
-             while msg
-             do (handle-message worker msg))
-          (bt:condition-wait (worker-message-ready? worker)
-                             *worker-lock*))))
+      (loop for msg = (queues:qpop (worker-message-queue worker))
+            while msg
+            do (handle-message worker msg))))
    :name (format nil "worker-event-process [~A]" worker)))
 
 (defmethod start-worker ((worker worker))
@@ -78,9 +66,7 @@
   (and (worker-event-process worker) t))
 
 (defmethod deliver-message-to-worker (msg (worker worker))
-  (bt:with-lock-held (*worker-lock*)
-    (queues:qpush (worker-message-queue worker) msg)
-    (bt:condition-notify (worker-message-ready? worker))))
+  (queues:qpush (worker-message-queue worker) msg))
 
 
 ;;; ---------------------------------------------------------------------
