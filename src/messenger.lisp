@@ -68,22 +68,11 @@
        (queues:qpush (messenger-receive-queue (the-messenger)) 
                      (bytes->object (subseq buffer 0 size))))))
 
-(defparameter *last-local-message-delivery* nil)
-
-;;; default delivery if the datum is not an envelope
-;;; (without an envelope we don't know that the destination worker is,
-;;; so we choose the default recipient worker)
-(defmethod deliver-message (datum)
-  (deliver-message-to-worker datum (messenger-default-recipient (the-messenger))))
-
-(defmethod deliver-message ((env envelope))
-  (let* ((destination-worker-name (envelope-destination-worker env))
+(defmethod deliver-message ((msg message))
+  (let* ((destination-worker-name (message-to-worker msg))
          (recipient (or (find-known-worker destination-worker-name)
-                        (messenger-default-recipient (the-messenger))))
-         (contents (envelope-contents env)))
-    (deliver-message-to-worker contents recipient)
-    (setf *last-local-message-delivery*
-          (cons recipient env))))
+                        (messenger-default-recipient (the-messenger)))))
+    (deliver-message-to-worker msg recipient)))
 
 (defun run-local-message-delivery ()
   (loop
@@ -95,13 +84,13 @@
 (defun run-sender ()
   (loop
      (sleep 0.1)
-     (do ((env (queues:qpop (messenger-send-queue (the-messenger)))
+     (do ((msg (queues:qpop (messenger-send-queue (the-messenger)))
                (queues:qpop (messenger-send-queue (the-messenger)))))
          ;; when qpop returns nil, we've sent all the pending messages
-         ((null env) 'done-sending)
-       (let ((host (envelope-destination-host env))
-             (port (envelope-destination-port env))
-             (msg-bytes (object->bytes env)))
+         ((null msg) 'done-sending)
+       (let ((host (message-to-host msg))
+             (port (message-to-port msg))
+             (msg-bytes (object->bytes msg)))
          (clear-send-buffer)
          (replace (messenger-send-buffer (the-messenger)) msg-bytes)
          (let ((out (usocket:socket-connect nil nil :protocol :datagram)))
@@ -170,13 +159,8 @@
          do (let ((worker (gethash key workers-table nil)))
               (when worker (stop-worker worker)))))))
 
-(defmethod send-message ((message message)(host string)(port integer) &optional (destination-worker nil))
-  (let* ((envelope (make-instance 'envelope
-                                  :contents message
-                                  :destination-host host
-                                  :destination-port port
-                                  :destination-worker destination-worker)))
-    (queues::qpush (messenger-send-queue (the-messenger)) envelope)))
+(defmethod send-message ((message message))
+  (queues::qpush (messenger-send-queue (the-messenger)) message))
 
 (defun object->bytes (obj)
   (let* ((data (flexi-streams:with-output-to-sequence (out)

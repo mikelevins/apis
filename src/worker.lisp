@@ -47,9 +47,6 @@
   (let ((op (message-operation msg)))
     (handle-message-operation worker msg op)))
 
-(defmethod handle-message ((worker worker) (env envelope))
-  (handle-message worker (envelope-contents env)))
-
 (defmethod handle-message ((worker worker) msg)
   (format t "Worker ~S received unrecognized message: ~S"
             worker (with-output-to-string (s)

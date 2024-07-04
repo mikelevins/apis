@@ -8,18 +8,28 @@
 #+nil (time (makeid))
 #+nil (integer-length (makeid))
 
-
-;;; messenger
+;;; serialization
 ;;; ---------------------------------------------------------------------
 
 #+nil (type-of (object->bytes (list :list 1 "two" 3)))
 #+nil (bytes->object (object->bytes (list :list 1 "two" 3)))
+
+
+;;; messenger, local delivery
+;;; ---------------------------------------------------------------------
+
 #+nil (start-messaging)
-#+nil (defparameter $msg1 (make-instance 'message :operation nil :data '(1 2 3)))
-#+nil (defparameter $msg2 (make-instance 'message :operation :ping))
-#+nil (send-message $msg1 *localhost* *message-receive-port*)
-#+nil (send-message $msg2 *localhost* *message-receive-port*)
-#+nil (send-message $msg1 *localhost* *message-receive-port* :default-recipient)
+#+nil (defparameter $msg1 (make-instance 'message :operation nil :arguments '(1 2 3)
+                                         :to-host *localhost* :to-port *message-receive-port*
+                                         :to-worker :default-recipient))
+#+nil (defparameter $msg2 (make-instance 'message :operation :ping
+                                         :to-host *localhost* :to-port *message-receive-port*
+                                         :to-worker :default-recipient))
+#+nil (send-message $msg1)
+#+nil (send-message $msg2)
+
+;;; messenger, remote delivery
+;;; ---------------------------------------------------------------------
 
 #+nil (send-message $msg1 "192.168.0.51" *message-receive-port*)
 #+nil (send-message $msg1 "192.168.0.159" *message-receive-port*)
@@ -30,7 +40,7 @@
 #+nil (stop-messaging)
 
 
-;;; workers and message delivery
+;;; workers, message delivery
 ;;; ---------------------------------------------------------------------
 
 #+nil (start-messaging)

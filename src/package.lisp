@@ -23,8 +23,6 @@
    #:define-known-worker
    #:deliver-message
    #:deliver-message-to-worker
-   #:envelope
-   #:envelope-contents
    #:find-known-worker
    #:handle-message
    #:handle-message-operation
@@ -33,7 +31,7 @@
    #:list-stopped-workers
    #:makeid
    #:message
-   #:message-data
+   #:message-arguments
    #:message-operation
    #:message-time-to-live
    #:message-timestamp

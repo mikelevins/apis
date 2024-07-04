@@ -43,7 +43,6 @@
                              (:file "utils")
                              (:file "identifier")
                              (:file "message")
-                             (:file "envelope")
                              (:file "worker")
                              (:file "messenger")
                              ))))

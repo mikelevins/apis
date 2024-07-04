@@ -21,3 +21,10 @@
 #+nil (low-n-bits 4 #b110101011)
 #+nil (integer-length #b110101011)
 #+nil (ldb (byte 2 0) #b100101010)
+
+;;; return the current number of seconds since the Apis epoch
+(defun get-apis-time ()
+  (- (get-universal-time)
+     +apis-epoch+))
+
+#+nil (time (get-apis-time))
