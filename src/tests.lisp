@@ -31,12 +31,18 @@
 ;;; messenger, remote delivery
 ;;; ---------------------------------------------------------------------
 
-#+nil (send-message $msg1 "192.168.0.51" *message-receive-port*)
-#+nil (send-message $msg1 "192.168.0.159" *message-receive-port*)
-#+nil (send-message $msg2 "192.168.0.159" *message-receive-port*)
-#+nil (describe (messenger-receive-queue (the-messenger)))
-#+nil (describe (messenger-send-queue (the-messenger)))
-#+nil (describe (the-messenger))
+;;; to jupiter
+#+nil (defparameter $msg1 (make-instance 'message :operation nil :arguments '(1 2 3)
+                                         :to-host "192.168.0.64" :to-port *message-receive-port*
+                                         :to-worker :default-recipient))
+;;; to jupiter
+#+nil (defparameter $msg2 (make-instance 'message :operation :ping
+                                         :to-host "192.168.0.64" :to-port *message-receive-port*
+                                         :to-worker :default-recipient))
+
+#+nil (send-message $msg1)
+#+nil (send-message $msg2)
+
 #+nil (stop-messaging)
 
 
