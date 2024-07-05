@@ -28,3 +28,6 @@
 (defparameter *message-receive-port* 10764)
 (defparameter *maximum-buffer-size* 32767)
 (defparameter *default-message-time-to-live* 600) ; seconds
+
+(defparameter +messenger-log-level+ '(:debug :info :none))
+(defparameter *messenger-log-level* :info)
