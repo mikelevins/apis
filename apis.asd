@@ -42,6 +42,7 @@
                              (:file "parameters")
                              (:file "utils")
                              (:file "identifier")
+                             (:file "recipient")
                              (:file "message")
                              (:file "worker")
                              (:file "messenger")
