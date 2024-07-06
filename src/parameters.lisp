@@ -31,8 +31,3 @@
 
 (defparameter +messenger-log-level+ '(:debug :info :none))
 (defparameter *messenger-log-level* :info)
-
-;;; constants initialized at process startup
-(defparameter +nodeid-string+ (nodeid:ensure-nodeid))
-(defparameter +nodeid-uuid+ (frugal-uuid:from-string +nodeid-string+))
-(defparameter +nodeid-integer+ (frugal-uuid:to-integer +nodeid-uuid+))
