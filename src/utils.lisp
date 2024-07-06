@@ -28,3 +28,13 @@
      +apis-epoch+))
 
 #+nil (time (get-apis-time))
+
+
+(defun object->bytes (obj)
+  (let* ((data (flexi-streams:with-output-to-sequence (out)
+                 (cl-store:store obj out))))
+    data))
+
+(defmethod bytes->object ((bytes vector))
+  (flexi-streams::with-input-from-sequence (in bytes)
+    (cl-store:restore in)))
