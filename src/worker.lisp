@@ -13,7 +13,7 @@
 ;;; ---------------------------------------------------------------------
 ;;; CLASS worker
 ;;; ---------------------------------------------------------------------
-;;; represents workers and worker processes
+;;; a worker packages some local state and a message-handling thread
 
 (defclass worker ()
   ((id :reader worker-id :initform (makeid) :initarg :id)
