@@ -2,9 +2,9 @@
 ;;;;
 ;;;; Name:          worker.lisp
 ;;;; Project:       the apis message-passing system
-;;;; Purpose:       worker implementation for abcl
+;;;; Purpose:       worker implementation
 ;;;; Author:        mikel evins
-;;;; Copyright:     2015 by mikel evins
+;;;; Copyright:     2015-2024 by mikel evins
 ;;;;
 ;;;; ***********************************************************************
 
