@@ -19,7 +19,10 @@
   ((id :reader worker-id :initform (makeid) :initarg :id)
    (name :initform nil :initarg :name)
    (message-queue :accessor worker-message-queue :initform (make-instance 'queues:simple-cqueue))
-   (event-process :accessor worker-event-process :initform nil)))
+   (event-process :accessor worker-event-process :initform nil)
+   (loop-count :accessor worker-loop-count :initform 0)
+   (message-lock :accessor worker-message-lock :initform (bt:make-lock "message lock") )
+   (message-variable :accessor worker-message-variable :initform (bt:make-condition-variable :name "message variable"))))
 
 (defmethod worker-name ((worker worker))
   (or (slot-value worker 'name)
@@ -44,14 +47,21 @@
             worker (with-output-to-string (s)
                     (describe msg s))))
 
+
+
 (defmethod make-worker-event-process ((worker worker))
   (bt:make-thread
    (lambda ()
      (loop ; loop forever
-      (loop ; loop over the message queue
-            for msg = (queues:qpop (worker-message-queue worker))
-            while msg
-            do (handle-message worker msg))))
+      (incf (worker-loop-count worker))
+      (format t "~%loop-count: ~A" (worker-loop-count worker))
+      (bt:with-lock-held ((worker-message-lock worker))
+        (loop ; loop over the message queue
+              for msg = (queues:qpop (worker-message-queue worker))
+              while msg
+              do (handle-message worker msg))
+        (bt:condition-wait (worker-message-variable worker)
+                           (worker-message-lock worker)))))
    :name (format nil "worker-event-process [~A]" worker)))
 
 (defmethod start-worker ((worker worker))
@@ -67,7 +77,8 @@
   (and (worker-event-process worker) t))
 
 (defmethod deliver-message-to-worker (msg (worker worker))
-  (queues:qpush (worker-message-queue worker) msg))
+  (queues:qpush (worker-message-queue worker) msg)
+  (bt:condition-notify (worker-message-variable worker)))
 
 
 ;;; ---------------------------------------------------------------------
