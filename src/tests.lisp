@@ -42,9 +42,14 @@
 #+nil (defparameter $msg2 (make-instance 'message :operation :ping
                                          :to-host "192.168.0.64" :to-port *message-receive-port*
                                          :to-worker :default-recipient))
+;;; to saturn
+#+nil (defparameter $msg3 (make-instance 'message :operation nil :arguments '(1 2 3)
+                                         :to-host "192.168.0.159" :to-port *message-receive-port*
+                                         :to-worker :default-recipient))
 
 #+nil (send-message $msg1)
 #+nil (send-message $msg2)
+#+nil (send-message $msg3)
 
 #+nil (stop-messaging)
 
