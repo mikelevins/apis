@@ -47,8 +47,9 @@
 (defmethod make-worker-event-process ((worker worker))
   (bt:make-thread
    (lambda ()
-     (loop
-      (loop for msg = (queues:qpop (worker-message-queue worker))
+     (loop ; loop forever
+      (loop ; loop over the message queue
+            for msg = (queues:qpop (worker-message-queue worker))
             while msg
             do (handle-message worker msg))))
    :name (format nil "worker-event-process [~A]" worker)))

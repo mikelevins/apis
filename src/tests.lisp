@@ -65,7 +65,15 @@
 #+nil (describe $b)
 #+nil (start-worker $a)
 #+nil (start-worker $b)
-#+nil (deliver-message-to-worker (vector 1) $a)
+
+
+#+nil (defparameter $msg1 (make-instance 'message :operation nil :arguments '(1 2 3)
+                                         :to-host *localhost* :to-port *message-receive-port*
+                                         :to-worker $a))
+
+
+#+nil (send-message $msg1)
+#+nil (deliver-message-to-worker $msg1 $a)
 #+nil (deliver-message-to-worker (vector 2) $b)
 #+nil (deliver-message-to-worker (vector 1 2) $a)
 #+nil (deliver-message-to-worker (vector 1 2 3) $a)
