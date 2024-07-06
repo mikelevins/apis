@@ -56,10 +56,13 @@
       (incf (worker-loop-count worker))
       (format t "~%loop-count: ~A" (worker-loop-count worker))
       (bt:with-lock-held ((worker-message-lock worker))
-        (loop ; loop over the message queue
-              for msg = (queues:qpop (worker-message-queue worker))
-              while msg
-              do (handle-message worker msg))
+        ;; check qsize because bt can in principle unblock waiting even if
+        ;; nobody called condition-notify
+        (unless (zerop (queues:qsize (worker-message-queue worker)))
+          (loop ; loop over the message queue
+                for msg = (queues:qpop (worker-message-queue worker))
+                while msg
+                do (handle-message worker msg)))
         (bt:condition-wait (worker-message-variable worker)
                            (worker-message-lock worker)))))
    :name (format nil "worker-event-process [~A]" worker)))
