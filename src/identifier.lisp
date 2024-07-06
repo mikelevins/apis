@@ -15,8 +15,8 @@
 ;;; ---------------------------------------------------------------------
 ;;; A 64-bit integer identifier that combines:
 ;;; - apis time (32-bit number of seconds since the Apis epoch)
+;;; - the low 16 bits of the nodeid 
 ;;; - 16 bits of counter, allowing us to generate up to 65535 IDs per second
-;;; - a 16-bit random integer generated for each id
 
 (defun makeid ()
   (let* ((time (get-apis-time)))
@@ -25,12 +25,12 @@
                (loop until (not (= time (get-apis-time)))))
         (incf *session-id-counter*))
     (let ((time-bits (get-apis-time))
-          (random-bits (ironclad:strong-random #b1111111111111111)))
-      (+ random-bits
-         (ash *session-id-counter* 16)
+          (node-bits (low-n-bits 16 (frugal-uuid:to-integer (frugal-uuid:from-string (nodeid:ensure-nodeid))))))
+      (+ *session-id-counter*
+         (ash node-bits 16)
          (ash time-bits 32)))))
 
-#+nil (makeid)
+#+nil (let ((id (makeid)))(format t "~%~x (~a)" (low-n-bits 16 id)(low-n-bits 16 id)))
 #+nil (time (progn (setf $ids (loop for i from 0 below 1000000 collect (makeid))) :done))
 #+nil (length $ids)
 #+nil (length (remove-duplicates $ids))
