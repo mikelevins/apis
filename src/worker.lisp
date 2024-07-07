@@ -20,7 +20,6 @@
    (name :initform nil :initarg :name)
    (message-queue :accessor worker-message-queue :initform (make-instance 'queues:simple-cqueue))
    (event-process :accessor worker-event-process :initform nil)
-   (loop-count :accessor worker-loop-count :initform 0)
    (message-lock :accessor worker-message-lock :initform (bt:make-lock "message lock") )
    (message-variable :accessor worker-message-variable :initform (bt:make-condition-variable :name "message variable"))))
 
@@ -60,8 +59,6 @@
   (bt:make-thread
    (lambda ()
      (loop ; loop forever
-      (incf (worker-loop-count worker))
-      (format t "~%loop-count: ~A" (worker-loop-count worker))
       (bt:with-lock-held ((worker-message-lock worker))
         ;; check qsize because bt can in principle unblock waiting even if
         ;; nobody called condition-notify
