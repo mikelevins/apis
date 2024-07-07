@@ -38,6 +38,13 @@
 (defmethod handle-message-operation ((worker worker) (msg message)(op (eql :ping)))
   (format t "~%Worker ~S received :ping" worker))
 
+(defmethod handle-message-operation ((worker worker) (msg message)(op (eql :timed-sleep)))
+  (let* ((args (message-arguments msg))
+         (secs (first args)))
+    (format t "~%Worker ~S received :timed-sleep ~S" worker secs)
+    (sleep secs)
+    (format t "~%Worker ~S :timed-sleep ended" worker)))
+
 (defmethod handle-message ((worker worker) (msg message))
   (let ((op (message-operation msg)))
     (handle-message-operation worker msg op)))

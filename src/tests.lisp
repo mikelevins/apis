@@ -59,26 +59,14 @@
 
 #+nil (start-messaging)
 #+nil (stop-messaging)
-#+nil (defparameter $a (make-instance 'worker))
-#+nil (defparameter $b (make-instance 'worker))
-#+nil (describe $a)
-#+nil (describe $b)
-#+nil (start-worker $a)
-#+nil (start-worker $b)
+#+nil (defparameter $w1 (make-instance 'worker))
+#+nil (start-worker $w1)
 
+#+nil (defparameter $msg1
+        (make-instance 'message :operation :timed-sleep :arguments '(15)
+                       :to-host nil :to-port nil
+                       :to-worker $w1))
 
-#+nil (defparameter $msg1 (make-instance 'message :operation nil :arguments '(1 2 3)
-                                         :to-host *localhost* :to-port *message-receive-port*
-                                         :to-worker $a))
+#+nil (deliver-message-to-worker $msg1 $w1)
+#+nil (stop-worker $w1)
 
-
-#+nil (send-message $msg1)
-#+nil (deliver-message-to-worker $msg1 $a)
-#+nil (deliver-message-to-worker (vector 2) $b)
-#+nil (deliver-message-to-worker (vector 1 2) $a)
-#+nil (deliver-message-to-worker (vector 1 2 3) $a)
-#+nil (stop-worker $a)
-#+nil (stop-worker $b)
-#+nil (queues:qsize (worker-message-queue $a))
-#+nil (queues:qsize (worker-message-queue $b))
-#+nil (list-published-workers)
