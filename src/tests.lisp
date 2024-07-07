@@ -65,12 +65,12 @@
 #+nil (stop-worker $w1)
 
 #+nil (defparameter $msg1
-        (make-instance 'message :operation :timed-sleep :arguments '(5)
+        (make-instance 'message :operation :ping
                        :to-host nil :to-port nil
                        :to-worker $w1))
 
 #+nil (defparameter $msg2
-        (make-instance 'message :operation :timed-sleep :arguments '(6)
+        (make-instance 'message :operation :ping
                        :to-host nil :to-port nil
                        :to-worker $w1))
 
