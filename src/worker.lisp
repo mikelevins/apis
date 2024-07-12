@@ -19,13 +19,14 @@
   ((id :reader worker-id :initform (makeid) :initarg :id)
    (name :initform nil :initarg :name)
    (message-queue :accessor worker-message-queue :initform (make-instance 'queues:simple-cqueue))
-   (event-process :accessor worker-event-process :initform nil)
+   (message-thread :accessor worker-message-thread :initform nil :initarg :message-thread)
    (message-lock :accessor worker-message-lock :initform (bt:make-lock "message lock") )
    (message-variable :accessor worker-message-variable :initform (bt:make-condition-variable :name "message variable"))))
 
 (defmethod worker-name ((worker worker))
   (or (slot-value worker 'name)
-      (worker-id worker)))
+      (intern (format nil "WORKER-~X" (worker-id worker))
+              :keyword)))
 
 (defmethod print-object ((obj worker) stream)
   (print-unreadable-object (obj stream :type t :identity nil)
@@ -47,14 +48,14 @@
                     (describe msg s))))
 
 
-
-(defmethod make-worker-event-process ((worker worker))
+(defmethod make-worker-message-thread ((worker worker) &key thread-name)
   (bt:make-thread
    (lambda ()
      (loop ; loop forever
       (bt:with-lock-held ((worker-message-lock worker))
-        ;; check qsize because bt can in principle unblock waiting even if
-        ;; nobody called condition-notify
+        ;; check qsize because according to the bt docs, it can in
+        ;; principle unblock waiting even if nobody called
+        ;; condition-notify
         (unless (zerop (queues:qsize (worker-message-queue worker)))
           (loop ; loop over the message queue
                 for msg = (queues:qpop (worker-message-queue worker))
@@ -62,21 +63,23 @@
                 do (handle-message worker msg)))
         (bt:condition-wait (worker-message-variable worker)
                            (worker-message-lock worker)))))
-   :name (format nil "worker-event-process [~A]" worker)))
+   :name (or thread-name
+             (format nil "worker-message-thread [~A]" worker))))
 
 (defmethod start-worker ((worker worker))
-  (setf (worker-event-process worker)
-        (make-worker-event-process worker)))
+  (unless (bt:threadp (worker-message-thread worker))
+    (setf (worker-message-thread worker)
+          (make-worker-message-thread worker))))
 
 (defmethod stop-worker ((worker worker))
-  (let ((handler (shiftf (worker-event-process worker) nil)))
-    (when handler
-      (bt:destroy-thread handler))))
+  (let ((thread (shiftf (worker-message-thread worker) nil)))
+    (when thread
+      (bt:destroy-thread thread))))
 
 (defmethod worker-running? ((worker worker))
-  (and (worker-event-process worker) t))
+  (and (worker-message-thread worker) t))
 
-(defmethod deliver-message-to-worker (msg (worker worker))
+(defmethod deliver-message (msg (worker worker))
   (queues:qpush (worker-message-queue worker) msg)
   (bt:condition-notify (worker-message-variable worker)))
 

@@ -46,7 +46,6 @@
                              (:file "identifier")
                              (:file "message")
                              (:file "worker")
-                             (:file "messenger")
                              ))))
 
 ;;; (asdf:load-system :apis)

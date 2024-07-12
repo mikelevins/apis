@@ -57,25 +57,21 @@
 ;;; workers, message delivery
 ;;; ---------------------------------------------------------------------
 
-#+nil (start-messaging)
-#+nil (stop-messaging)
 #+nil (defparameter $w1 (make-instance 'worker))
-
+#+nil (worker-name $w1)
+#+nil (bt:threadp (worker-message-thread $w1))
 #+nil (start-worker $w1)
 #+nil (stop-worker $w1)
 
 #+nil (defparameter $msg1
         (make-instance 'message :operation :ping
-                       :to-host nil :to-port nil
-                       :to-worker $w1))
+                       :from nil
+                       :to $w1))
 
-#+nil (defparameter $msg2
-        (make-instance 'message :operation :ping
-                       :to-host nil :to-port nil
-                       :to-worker $w1))
-
-#+nil (deliver-message-to-worker $msg1 $w1)
-#+nil (deliver-message-to-worker $msg2 $w1)
-#+(nil (loop for i from 0 below 5 do (deliver-message-to-worker $msg1 $w1)))
-#+(nil (loop for i from 0 below 5 do (deliver-message-to-worker $msg2 $w1)))
+#+nil (deliver-message $msg1 $w1)
+#+nil (time (queues:qtop (worker-message-queue $w1)))
+#+nil (time (queues:qsize (worker-message-queue $w1)))
+#+nil (deliver-message $msg2 $w1)
+#+(nil (loop for i from 0 below 5 do (deliver-message $msg1 $w1)))
+#+(nil (loop for i from 0 below 5 do (deliver-message $msg2 $w1)))
 
