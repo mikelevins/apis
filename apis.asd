@@ -45,7 +45,9 @@
                              (:file "utils")
                              (:file "identifier")
                              (:file "message")
+                             (:file "envelope")
                              (:file "worker")
+                             (:file "handle-message")
                              ))))
 
 ;;; (asdf:load-system :apis)
