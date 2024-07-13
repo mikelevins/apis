@@ -15,14 +15,9 @@
 ;;; ---------------------------------------------------------------------
 ;;; abstract superclass of all workers
 
-;;; TODO: arrange to at intervals check the messages-waiting-for-reply
-;;;       and discard those whose time-to-live has expired. also, when
-;;;       discarding an expired message, signal a condition.
-
 (defclass worker ()
   ((id :reader worker-id :initform (makeid) :initarg :id)
-   (name :initform nil :initarg :name)
-   (messages-waiting-for-reply :initform (make-hash-table) :initarg :messages-waiting-for-reply)))
+   (name :initform nil :initarg :name)))
 
 (defmethod worker-name ((worker worker))
   (or (slot-value worker 'name)
@@ -39,12 +34,18 @@
 ;;; ---------------------------------------------------------------------
 ;;; a worker whose thread runs in the local process
 
+
+;;; TODO: arrange to at intervals check the messages-waiting-for-reply
+;;;       and discard those whose time-to-live has expired. also, when
+;;;       discarding an expired message, signal a condition.
+
 (defclass local-worker (worker)
   ((id :reader worker-id :initform (makeid) :initarg :id)
    (name :initform nil :initarg :name)
    (message-queue :accessor worker-message-queue :initform (make-instance 'queues:simple-cqueue))
    (message-thread :accessor worker-message-thread :initform nil :initarg :message-thread)
-   (message-semaphore :accessor worker-message-semaphore :initform (bt:make-semaphore :name "message semaphore") )))
+   (message-semaphore :accessor worker-message-semaphore :initform (bt:make-semaphore :name "message semaphore") )
+   (messages-waiting-for-reply :initform (make-hash-table) :initarg :messages-waiting-for-reply)))
 
 (defmethod handle-message-operation ((worker local-worker) (msg message) op)
   (format t "~%Worker ~S received: ~S ~S~%" worker
@@ -97,8 +98,8 @@
 ;;; ---------------------------------------------------------------------
 ;;; CLASS remote-worker
 ;;; ---------------------------------------------------------------------
-;;; a worker whose thread runs in some other process, possibly on
-;;; another host
+;;; a reference to a worker whose thread runs in some other process,
+;;; possibly on another host
 
 (defclass remote-worker ()
   ((host :initform nil :initarg :host)
