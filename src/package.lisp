@@ -11,25 +11,14 @@
 (defpackage #:apis
   (:use #:cl #:org.tfeb.hax.singleton-classes)
   (:export
-   #:*last-local-message-delivery*
-   #:*worker-lock*
-   #:define-known-worker
-   #:deliver-message
-   #:find-known-worker
    #:handle-message
    #:handle-message-operation
-   #:list-published-workers
-   #:list-running-workers
-   #:list-stopped-workers
    #:makeid
    #:message
    #:message-arguments
    #:message-operation
    #:message-time-to-live
    #:message-timestamp
-   #:messenger
-   #:messenger-published-workers
-   #:remove-known-worker
    #:send-message
    #:singleton-message
    #:start-messaging

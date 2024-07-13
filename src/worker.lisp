@@ -13,43 +13,53 @@
 ;;; ---------------------------------------------------------------------
 ;;; CLASS worker
 ;;; ---------------------------------------------------------------------
-;;; a worker packages some local state and a message-handling thread
+;;; abstract superclass of all workers
 
 (defclass worker ()
+  ((id :reader worker-id :initform (makeid) :initarg :id)
+   (name :initform nil :initarg :name)))
+
+(defmethod worker-name ((worker worker))
+  (or (slot-value worker 'name)
+      (let ((class-name (class-name (class-of worker))))
+        (intern (format nil "~A-~X" class-name (worker-id worker))
+                :keyword))))
+
+(defmethod print-object ((obj worker) stream)
+  (print-unreadable-object (obj stream :type t :identity nil)
+    (format stream "~A" (worker-name obj))))
+
+;;; ---------------------------------------------------------------------
+;;; CLASS local-worker
+;;; ---------------------------------------------------------------------
+;;; a worker whose thread runs in the local process
+
+(defclass local-worker (worker)
   ((id :reader worker-id :initform (makeid) :initarg :id)
    (name :initform nil :initarg :name)
    (message-queue :accessor worker-message-queue :initform (make-instance 'queues:simple-cqueue))
    (message-thread :accessor worker-message-thread :initform nil :initarg :message-thread)
    (message-semaphore :accessor worker-message-semaphore :initform (bt:make-semaphore :name "message semaphore") )))
 
-(defmethod worker-name ((worker worker))
-  (or (slot-value worker 'name)
-      (intern (format nil "WORKER-~X" (worker-id worker))
-              :keyword)))
+(defmethod handle-message-operation ((worker local-worker) (msg message) op)
+  (format t "~%Worker ~S received: ~S ~S~%" worker
+          (message-operation msg)
+          (message-arguments msg)))
 
-(defmethod print-object ((obj worker) stream)
-  (print-unreadable-object (obj stream :type t :identity nil)
-    (format stream "~A" (worker-name obj))))
-
-(defmethod handle-message-operation ((worker worker) (msg message) op)
-  (format t "~%Worker ~S received message:~%  ~S~%" worker msg))
-
-(defmethod handle-message-operation ((worker worker) (msg message)(op (eql :ping)))
+(defmethod handle-message-operation ((worker local-worker) (msg message)(op (eql :ping)))
   (format t "~%Worker ~S received :ping" worker))
 
-(defmethod handle-message ((worker worker) (msg message))
+(defmethod handle-message ((worker local-worker) msg)
+  (format t "Worker ~S received unrecognized message: ~S"
+          worker (with-output-to-string (s)
+                   (describe msg s))))
+
+(defmethod handle-message ((worker local-worker) (msg message))
   (let ((op (message-operation msg))
         (args (message-arguments msg)))
-    (format t "~%~S received message ~S ~S" worker op args)
     (handle-message-operation worker msg op)))
 
-(defmethod handle-message ((worker worker) msg)
-  (format t "Worker ~S received unrecognized message: ~S"
-            worker (with-output-to-string (s)
-                    (describe msg s))))
-
-
-(defmethod make-worker-message-thread ((worker worker) &key thread-name)
+(defmethod make-worker-message-thread ((worker local-worker) &key thread-name)
   (bt:make-thread
    (lambda ()
      (loop ; loop forever
@@ -60,53 +70,33 @@
             do (handle-message worker msg))))
    :name (or thread-name (format nil "message thread [~A]" worker))))
 
-(defmethod start-worker ((worker worker))
+(defmethod start-worker ((worker local-worker))
   (unless (bt:threadp (worker-message-thread worker))
     (setf (worker-message-thread worker)
           (make-worker-message-thread worker))))
 
-(defmethod stop-worker ((worker worker))
+(defmethod stop-worker ((worker local-worker))
   (let ((thread (shiftf (worker-message-thread worker) nil)))
     (when thread
       (bt:destroy-thread thread))))
 
-(defmethod worker-running? ((worker worker))
+(defmethod worker-running? ((worker local-worker))
   (and (worker-message-thread worker) t))
 
-(defmethod deliver-message (msg (worker worker))
+(defmethod send-message (msg (worker local-worker))
   (let ((q (worker-message-queue worker)))
     (bt:with-recursive-lock-held ((queues::lock-of q))
       (queues:qpush q msg)
       (bt:signal-semaphore (worker-message-semaphore worker)))))
 
-
 ;;; ---------------------------------------------------------------------
-;;; SINGLETON-CLASS published-workers
+;;; CLASS remote-worker
 ;;; ---------------------------------------------------------------------
-;;; keeps track of known workers for messaging and management purposes
+;;; a worker whose thread runs in some other process, possibly on
+;;; another host
 
-(defclass published-workers ()
-  ((roster :reader published-workers-roster :initform (make-hash-table :test 'eql)))
-  (:metaclass singleton-class))
+(defclass remote-worker ()
+  ((host :initform nil :initarg :host)
+   (port :initform nil :initarg :port)))
 
-(defun the-published-workers ()(make-instance 'published-workers))
 
-(defmethod find-known-worker ((name symbol))
-  (gethash name (published-workers-roster (the-published-workers)) nil))
-
-(defun list-published-workers ()
-  (loop for key being the hash-keys in (published-workers-roster (the-published-workers))
-     collect key))
-
-(defmethod define-known-worker ((name symbol)(worker worker))
-  (let ((old-worker (find-known-worker name)))
-    (when old-worker (stop-worker old-worker)))
-  (setf (gethash name (published-workers-roster (the-published-workers)))
-        worker)
-  worker)
-
-(defmethod remove-known-worker ((name symbol))
-  (let ((old-worker (find-known-worker name)))
-    (when old-worker (stop-worker old-worker)))
-  (remhash name (published-workers-roster (the-published-workers)))
-  name)
