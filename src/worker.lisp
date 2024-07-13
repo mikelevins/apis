@@ -15,6 +15,10 @@
 ;;; ---------------------------------------------------------------------
 ;;; abstract superclass of all workers
 
+;;; TODO: arrange to at intervals check the messages-waiting-for-reply
+;;;       and discard those whose time-to-live has expired. also, when
+;;;       discarding an expired message, signal a condition.
+
 (defclass worker ()
   ((id :reader worker-id :initform (makeid) :initarg :id)
    (name :initform nil :initarg :name)
