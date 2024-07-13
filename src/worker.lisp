@@ -20,8 +20,7 @@
    (name :initform nil :initarg :name)
    (message-queue :accessor worker-message-queue :initform (make-instance 'queues:simple-cqueue))
    (message-thread :accessor worker-message-thread :initform nil :initarg :message-thread)
-   (message-lock :accessor worker-message-lock :initform (bt:make-lock "message lock") )
-   (message-variable :accessor worker-message-variable :initform (bt:make-condition-variable :name "message variable"))))
+   (message-semaphore :accessor worker-message-semaphore :initform (bt:make-semaphore :name "message semaphore") )))
 
 (defmethod worker-name ((worker worker))
   (or (slot-value worker 'name)
@@ -39,7 +38,9 @@
   (format t "~%Worker ~S received :ping" worker))
 
 (defmethod handle-message ((worker worker) (msg message))
-  (let ((op (message-operation msg)))
+  (let ((op (message-operation msg))
+        (args (message-arguments msg)))
+    (format t "~%~S received message ~S ~S" worker op args)
     (handle-message-operation worker msg op)))
 
 (defmethod handle-message ((worker worker) msg)
@@ -52,19 +53,12 @@
   (bt:make-thread
    (lambda ()
      (loop ; loop forever
-      (bt:with-lock-held ((worker-message-lock worker))
-        ;; check qsize because according to the bt docs, it can in
-        ;; principle unblock waiting even if nobody called
-        ;; condition-notify
-        (unless (zerop (queues:qsize (worker-message-queue worker)))
-          (loop ; loop over the message queue
-                for msg = (queues:qpop (worker-message-queue worker))
-                while msg
-                do (handle-message worker msg)))
-        (bt:condition-wait (worker-message-variable worker)
-                           (worker-message-lock worker)))))
-   :name (or thread-name
-             (format nil "worker-message-thread [~A]" worker))))
+      (bt:wait-on-semaphore (worker-message-semaphore worker))
+      (loop ; loop over the message queue
+            for msg = (queues:qpop (worker-message-queue worker))
+            while msg
+            do (handle-message worker msg))))
+   :name (or thread-name (format nil "message thread [~A]" worker))))
 
 (defmethod start-worker ((worker worker))
   (unless (bt:threadp (worker-message-thread worker))
@@ -80,8 +74,10 @@
   (and (worker-message-thread worker) t))
 
 (defmethod deliver-message (msg (worker worker))
-  (queues:qpush (worker-message-queue worker) msg)
-  (bt:condition-notify (worker-message-variable worker)))
+  (let ((q (worker-message-queue worker)))
+    (bt:with-recursive-lock-held ((queues::lock-of q))
+      (queues:qpush q msg)
+      (bt:signal-semaphore (worker-message-semaphore worker)))))
 
 
 ;;; ---------------------------------------------------------------------
