@@ -17,7 +17,8 @@
 
 (defclass worker ()
   ((id :reader worker-id :initform (makeid) :initarg :id)
-   (name :initform nil :initarg :name)))
+   (name :initform nil :initarg :name)
+   (messages-waiting-for-reply :initform (make-hash-table) :initarg :messages-waiting-for-reply)))
 
 (defmethod worker-name ((worker worker))
   (or (slot-value worker 'name)
