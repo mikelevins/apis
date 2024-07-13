@@ -19,7 +19,7 @@
    #:message-operation
    #:message-time-to-live
    #:message-timestamp
-   #:send-message
+   #:send
    #:singleton-message
    #:start-messaging
    #:start-worker

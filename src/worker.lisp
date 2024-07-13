@@ -14,6 +14,8 @@
 ;;; CLASS worker
 ;;; ---------------------------------------------------------------------
 
+(defparameter *local-workers* (make-hash-table :test 'eql))
+
 (defclass worker ()
   ((id :reader worker-id :initform (makeid) :initarg :id)
    (description :reader worker-description :initform nil :initarg :description)
@@ -21,6 +23,12 @@
    (message-thread :accessor worker-message-thread :initform nil :initarg :message-thread)
    (message-semaphore :accessor worker-message-semaphore :initform (bt:make-semaphore :name "message semaphore") )
    (messages-waiting-for-reply :initform (make-hash-table) :initarg :messages-waiting-for-reply)))
+
+(defmethod initialize-instance :after ((instance worker) &rest initargs &key &allow-other-keys)
+  (let* ((id (worker-id instance))
+         (already-worker (gethash id *local-workers* nil)))
+    (assert (null already-worker)() "There is already a worker with ID ~S" id)
+    (setf (gethash id *local-workers*) instance)))
 
 (defmethod workerp (thing) nil)
 (defmethod workerp ((thing worker)) t)
@@ -30,15 +38,29 @@
     (format stream "~S" (or (worker-description obj)
                                    (worker-id obj)))))
 
+(defun list-local-worker-ids ()
+  (loop for k being the hash-keys in *local-workers*
+        collect k))
+
+(defun list-local-workers ()
+  (loop for v being the hash-values in *local-workers*
+        collect v))
+
+(defmethod find-local-worker ((id integer))
+  (gethash id *local-workers* nil))
+
+(defmethod find-local-worker ((worker worker))
+  worker)
+
 (defmethod make-worker-message-thread ((worker worker) &key thread-name)
   (bt:make-thread
    (lambda ()
      (loop ; loop forever
       (bt:wait-on-semaphore (worker-message-semaphore worker))
       (loop ; loop over the message queue
-            for msg = (queues:qpop (worker-message-queue worker))
-            while msg
-            do (handle-message worker msg))))
+            for envelope = (queues:qpop (worker-message-queue worker))
+            while envelope
+            do (receive envelope))))
    :name (or thread-name (format nil "message thread [~A]" worker))))
 
 (defmethod start-worker ((worker worker))
@@ -54,11 +76,12 @@
 (defmethod worker-running? ((worker worker))
   (and (worker-message-thread worker) t))
 
-(defmethod send-message (msg (worker worker))
+(defmethod send ((env envelope) (worker worker))
   (let ((q (worker-message-queue worker)))
     (bt:with-recursive-lock-held ((queues::lock-of q))
-      (queues:qpush q msg)
+      (queues:qpush q env)
       (bt:signal-semaphore (worker-message-semaphore worker)))))
 
 
-
+(defmethod identify-worker ((thing worker)) thing)
+(defmethod identify-worker ((thing integer)) (find-local-worker thing))

@@ -1,8 +1,8 @@
 ;;;; ***********************************************************************
 ;;;;
-;;;; Name:          handle-message.lisp
+;;;; Name:          receive.lisp
 ;;;; Project:       the apis message-passing system
-;;;; Purpose:       methods for handling received messages
+;;;; Purpose:       handling received envelopes and messages
 ;;;; Author:        mikel evins
 ;;;; Copyright:     2015-2024 by mikel evins
 ;;;;
@@ -11,13 +11,13 @@
 (in-package #:apis)
 
 ;;; ---------------------------------------------------------------------
-;;; GENERIC FUNCTION handle-message worker message
+;;; GENERIC FUNCTION receive worker envelope
 ;;; ---------------------------------------------------------------------
 
-(defmethod handle-message ((worker worker) (msg message))
-  (let ((op (message-operation msg))
-        (args (message-arguments msg)))
-    (handle-message-operation worker msg op)))
+(defmethod receive ((env envelope))
+  (let* ((worker (identify-worker (to-worker env)))
+         (op (message-operation (message env))))
+    (handle-received-operation worker env op)))
 
 ;;; ---------------------------------------------------------------------
 ;;; GENERIC FUNCTION handle-message-operation worker message op
@@ -26,14 +26,9 @@
 ;;; unrecognized operations
 ;;; ---------------------------------------------------------------------
 
-(defmethod handle-message-operation ((worker worker) (msg message) op)
-  (format t "~%~S received: ~S ~S" worker
-          (message-operation msg)
-          (message-arguments msg)))
-
 ;;; :ping and :ack
 ;;; ---------------------------------------------------------------------
 
-(defmethod handle-message-operation ((worker worker) (msg message)(op (eql :ping)))
+(defmethod handle-received-operation ((worker worker) (env envelope)(op (eql :ping)))
   (format t "~%~S received :ping" worker))
 

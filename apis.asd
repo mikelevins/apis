@@ -47,7 +47,7 @@
                              (:file "message")
                              (:file "envelope")
                              (:file "worker")
-                             (:file "handle-message")
+                             (:file "receive")
                              ))))
 
 ;;; (asdf:load-system :apis)
