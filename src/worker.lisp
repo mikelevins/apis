@@ -35,8 +35,12 @@
 
 (defmethod print-object ((obj worker) stream)
   (print-unreadable-object (obj stream :type t :identity nil)
-    (format stream "~S" (or (worker-description obj)
-                                   (worker-id obj)))))
+    (format stream "~X" (worker-id obj))
+    (when (worker-description obj)
+      (format stream " ~S" (worker-description obj)))
+    (when (and (worker-message-thread obj)
+               (bt:thread-alive-p (worker-message-thread obj)))
+      (format stream " [RUNNING]"))))
 
 (defun list-local-worker-ids ()
   (loop for k being the hash-keys in *local-workers*
@@ -61,7 +65,7 @@
             for envelope = (queues:qpop (worker-message-queue worker))
             while envelope
             do (receive envelope))))
-   :name (or thread-name (format nil "message thread [~A]" worker))))
+   :name (or thread-name (format nil "message thread" worker))))
 
 (defmethod start-worker ((worker worker))
   (unless (bt:threadp (worker-message-thread worker))
