@@ -13,7 +13,6 @@
   (:export
    #:handle-message
    #:handle-message-operation
-   #:makeid
    #:message
    #:message-arguments
    #:message-operation

@@ -14,10 +14,10 @@
 ;;; CLASS worker
 ;;; ---------------------------------------------------------------------
 
-(defparameter *local-workers* (make-hash-table :test 'eql))
+(defparameter *local-workers* (make-hash-table :test 'equal))
 
 (defclass worker ()
-  ((id :reader worker-id :initform (makeid) :initarg :id)
+  ((id :reader worker-id :initform (ksuid::make-ksuid) :initarg :id)
    (description :reader worker-description :initform nil :initarg :description)
    (message-queue :accessor worker-message-queue :initform (make-instance 'queues:simple-cqueue))
    (message-thread :accessor worker-message-thread :initform nil :initarg :message-thread)
@@ -25,17 +25,23 @@
    (messages-waiting-for-reply :initform (make-hash-table) :initarg :messages-waiting-for-reply)))
 
 (defmethod initialize-instance :after ((instance worker) &rest initargs &key &allow-other-keys)
-  (let* ((id (worker-id instance))
-         (already-worker (gethash id *local-workers* nil)))
-    (assert (null already-worker)() "There is already a worker with ID ~S" id)
-    (setf (gethash id *local-workers*) instance)))
+  (let* ((idstr (worker-id-string instance))
+         (already-worker (gethash idstr *local-workers* nil)))
+    (assert (null already-worker)() "There is already a worker with ID ~S" idstr)
+    (setf (gethash idstr *local-workers*) instance)))
+
+(defmethod worker-id-number ((worker worker))
+  (ksuid::ksuid->integer (worker-id worker)))
+
+(defmethod worker-id-string ((worker worker))
+  (ksuid::ksuid->string (worker-id worker)))
 
 (defmethod workerp (thing) nil)
 (defmethod workerp ((thing worker)) t)
 
 (defmethod print-object ((obj worker) stream)
   (print-unreadable-object (obj stream :type t :identity nil)
-    (format stream "~X" (worker-id obj))
+    (format stream "~X" (ksuid::ksuid->string (worker-id obj)))
     (when (worker-description obj)
       (format stream " ~S" (worker-description obj)))
     (when (and (worker-message-thread obj)
@@ -50,7 +56,7 @@
   (loop for v being the hash-values in *local-workers*
         collect v))
 
-(defmethod find-local-worker ((id integer))
+(defmethod find-local-worker ((id string))
   (gethash id *local-workers* nil))
 
 (defmethod find-local-worker ((worker worker))

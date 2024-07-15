@@ -5,8 +5,7 @@
 ;;; identifiers
 ;;; ---------------------------------------------------------------------
 
-#+nil (time (makeid))
-#+nil (integer-length (makeid))
+#+nil (time (ksuid::make-ksuid))
 
 ;;; serialization
 ;;; ---------------------------------------------------------------------
@@ -21,7 +20,7 @@
 #+nil (defparameter $w1 (make-instance 'worker :description "test worker 1"))
 #+nil (list-local-workers)
 #+nil (find-local-worker $w1)
-#+nil (find-local-worker (worker-id $w1))
+#+nil (find-local-worker (worker-id-string $w1))
 #+nil (bt:threadp (worker-message-thread $w1))
 #+nil (start-worker $w1)
 #+nil (stop-worker $w1)

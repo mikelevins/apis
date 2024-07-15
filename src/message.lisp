@@ -16,7 +16,7 @@
 
 
 (defclass message ()
-  ((id :reader message-id :initform (makeid) :initarg :id)
+  ((id :reader message-id :initform (ksuid::make-ksuid) :initarg :id)
    (from :reader message-from :initform nil :initarg :from)
    (to :reader message-to :initform nil :initarg :to)
    (operation :reader message-operation :initform :ping :initarg :operation)

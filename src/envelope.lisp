@@ -22,7 +22,7 @@
 (defmethod print-object ((obj envelope) out-stream)
   (print-unreadable-object (obj out-stream :type t :identity nil)
     (let* ((dest-worker (to-worker obj))
-           (dest-id (cond ((workerp dest-worker)(format nil "~X" (worker-id dest-worker)))
+           (dest-id (cond ((workerp dest-worker)(format nil "~X" (worker-id-string dest-worker)))
                           ((integerp dest-worker) (format nil "~X" dest-worker))
                           ((null dest-worker) "apis"))))
       (format out-stream "from: ~A@~A:~A to: ~A@~A:~A"

@@ -30,6 +30,7 @@
                :ip-interfaces ; [LLGPL] https://github.com/elliottslaughter/ip-interfaces
                :ironclad ; [BSD] https://github.com/sharplispers/ironclad
                :local-time ; [MIT] https://github.com/dlowe-net/local-time?tab=License-1-ov-file#readme
+               :net.bardcode.ksuid ; [Apache 2.0] https://github.com/mikelevins/net.bardcode.ksuid
                :net.bardcode.literals ; [Apache 2.0] https://github.com/mikelevins/net.bardcode.literals
                :net.bardcode.nodeid ; [Apache 2.0] https://github.com/mikelevins/net.bardcode.nodeid
                :org.tfeb.hax.singleton-classes ; [MIT] https://github.com/tfeb/tfeb-lisp-hax
@@ -43,7 +44,6 @@
                 :components ((:file "package")
                              (:file "parameters")
                              (:file "utils")
-                             (:file "identifier")
                              (:file "message")
                              (:file "envelope")
                              (:file "worker")
