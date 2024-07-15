@@ -14,10 +14,11 @@
 ;;; GENERIC FUNCTION receive worker envelope
 ;;; ---------------------------------------------------------------------
 
-(defmethod receive ((env envelope))
-  (let* ((worker (identify-worker (to-worker env)))
-         (op (message-operation (message env))))
-    (handle-received-operation worker env op)))
+(defmethod receive ((msg message))
+  (let* ((to-address (message-to msg))
+         (worker (identify-worker (worker to-address)))
+         (op (message-operation msg)))
+    (handle-received-operation worker msg op)))
 
 ;;; ---------------------------------------------------------------------
 ;;; GENERIC FUNCTION handle-message-operation worker message op
@@ -29,6 +30,6 @@
 ;;; :ping and :ack
 ;;; ---------------------------------------------------------------------
 
-(defmethod handle-received-operation ((worker worker) (env envelope)(op (eql :ping)))
+(defmethod handle-received-operation ((worker worker) (msg message)(op (eql :ping)))
   (format t "~%~S received :ping" worker))
 

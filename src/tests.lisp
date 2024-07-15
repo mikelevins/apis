@@ -25,9 +25,8 @@
 #+nil (start-worker $w1)
 #+nil (stop-worker $w1)
 
-#+nil (defparameter $msg1 (make-instance 'message :operation :ping))
-#+nil (setf $e1 (make-instance 'envelope :to-worker $w1 :message $msg1))
-#+nil (send $e1 $w1)
+#+nil (defparameter $msg1 (make-instance 'message :to (delivery-address :worker $w1) :operation :ping))
+#+nil (send $msg1 $w1)
 
 #+nil (defparameter $msg2
         (make-instance 'message :operation :foo
@@ -42,4 +41,6 @@
 #+nil (send $e1 $w1)
 #+nil (time (queues:qtop (worker-message-queue $w1)))
 #+nil (time (queues:qsize (worker-message-queue $w1)))
+#+nil (describe (worker-message-queue $w1))
+#+nil (describe $w1)
 

@@ -27,10 +27,12 @@
 (defmethod print-object ((obj message) out-stream)
   (print-unreadable-object (obj out-stream :type t :identity nil)
     (format out-stream "~S ~S"
-            (message-id obj)
+            (ksuid::ksuid->string (message-id obj))
             (message-operation obj))))
 
-#+nil (defparameter $msg1 (make-instance 'message))
+#+nil (defparameter $msg1 (make-instance 'message
+                                         :from nil
+                                         :to (delivery-address)))
 #+nil (describe $msg1)
 #+nil (describe (bytes->object (object->bytes $msg1)))
 

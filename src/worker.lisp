@@ -68,9 +68,9 @@
      (loop ; loop forever
       (bt:wait-on-semaphore (worker-message-semaphore worker))
       (loop ; loop over the message queue
-            for envelope = (queues:qpop (worker-message-queue worker))
-            while envelope
-            do (receive envelope))))
+            for msg = (queues:qpop (worker-message-queue worker))
+            while msg
+            do (receive msg))))
    :name (or thread-name (format nil "message thread" worker))))
 
 (defmethod start-worker ((worker worker))
@@ -86,12 +86,13 @@
 (defmethod worker-running? ((worker worker))
   (and (worker-message-thread worker) t))
 
-(defmethod send ((env envelope) (worker worker))
+(defmethod send ((message message) (worker worker))
   (let ((q (worker-message-queue worker)))
     (bt:with-recursive-lock-held ((queues::lock-of q))
-      (queues:qpush q env)
+      (queues:qpush q message)
       (bt:signal-semaphore (worker-message-semaphore worker)))))
 
 
 (defmethod identify-worker ((thing worker)) thing)
+(defmethod identify-worker ((thing string)) (find-local-worker thing))
 (defmethod identify-worker ((thing integer)) (find-local-worker thing))
