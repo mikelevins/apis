@@ -26,21 +26,20 @@
 #+nil (stop-worker $w1)
 
 #+nil (defparameter $msg1 (make-instance 'message :to (delivery-address :worker $w1) :operation :ping))
-#+nil (send $msg1 $w1)
+#+nil (send $msg1)
 
-#+nil (defparameter $msg2
-        (make-instance 'message :operation :foo
-                       :arguments '(:bar :baz)))
+#+nil (defparameter $jupiter "192.168.0.64")
+#+nil (defparameter $saturn "192.168.0.159")
+#+nil (defparameter $msg2 (make-instance 'message
+                                         :to (delivery-address :host $saturn)
+                                         :operation :ping))
+#+nil (send $msg2)
+
+
 
 #+nil (setf $bytes (object->bytes $e1))
 #+nil (length $bytes)
 #+nil (setf $e2 (bytes->object $bytes))
 #+nil (message $e2)
 
-
-#+nil (send $e1 $w1)
-#+nil (time (queues:qtop (worker-message-queue $w1)))
-#+nil (time (queues:qsize (worker-message-queue $w1)))
-#+nil (describe (worker-message-queue $w1))
-#+nil (describe $w1)
 

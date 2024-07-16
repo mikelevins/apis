@@ -17,8 +17,8 @@
 
 (defclass message ()
   ((id :reader message-id :initform (ksuid::make-ksuid) :initarg :id)
-   (from :reader message-from :initform nil :initarg :from)
-   (to :reader message-to :initform nil :initarg :to)
+   (from :reader message-from :initform nil :initarg :from :type (or null delivery-address))
+   (to :reader message-to :initform nil :initarg :to :type (or null delivery-address))
    (operation :reader message-operation :initform :ping :initarg :operation)
    (arguments :reader message-arguments :initform nil :initarg :arguments)
    (timestamp :reader message-timestamp :initform (local-time:now) :initarg :timestamp)
