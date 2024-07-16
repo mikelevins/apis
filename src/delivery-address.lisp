@@ -19,6 +19,7 @@
   (print-unreadable-object (obj out-stream :type t :identity nil)
     (let* ((worker (worker obj))
            (id (cond ((workerp worker)(format nil "~X" (worker-id-string worker)))
+                     ((stringp worker) (format nil "~A" worker))
                      ((integerp worker) (format nil "~X" worker))
                      ((null worker) "apis"))))
       (format out-stream "~A@~A:~A"

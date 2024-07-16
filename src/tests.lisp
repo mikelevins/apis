@@ -31,8 +31,9 @@
 #+nil (defparameter $jupiter "192.168.0.64")
 #+nil (defparameter $saturn "192.168.0.159")
 #+nil (defparameter $msg2 (make-instance 'message
-                                         :to (delivery-address :host $saturn)
+                                         :to (delivery-address :host $saturn :worker "2jLVM21qFXkITB5Ro48Ac2gf9bM")
                                          :operation :ping))
+#+nil (describe $msg2)
 #+nil (send $msg2)
 
 

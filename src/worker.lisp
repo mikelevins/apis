@@ -101,13 +101,12 @@
 
 (defmethod send ((message message))
   (let ((to-address (message-to message)))
-    (if to-address
-        (let* ((worker (worker to-address)))
-          (if worker
-              (deliver-locally message worker)
-              (deliver-locally message nil)))
-        (deliver-locally message nil))))
-
+    (cond ((or (null to-address)
+               (equal "127.0.0.1" to-address)
+               (equal "localhost" to-address))
+           (let ((worker (worker to-address)))
+             (deliver-locally message worker)))
+          (t (deliver-remotely message)))))
 
 (defmethod identify-worker ((thing worker)) thing)
 (defmethod identify-worker ((thing string)) (find-local-worker thing))
