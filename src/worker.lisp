@@ -88,7 +88,7 @@
 
 ;;; deliver to nobody (i.e. to the apis process)
 (defmethod deliver-locally ((message message) (worker null))
-  (format t "~%Message delivered to nobody: ~S" message))
+  (deliver-locally message (the-dispatcher)))
 
 (defmethod deliver-locally ((message message) (worker worker))
   (let ((q (worker-message-queue worker)))
