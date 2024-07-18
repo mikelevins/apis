@@ -26,6 +26,7 @@
   :depends-on (
                :cl-base64 ; [BSD] https://github.com/darabi/cl-base64
                :cl-store ; [BSD] https://github.com/skypher/cl-store
+               :closer-mop ; [MIT] https://github.com/pcostanza/closer-mop
                :flexi-streams ; [BSD] https://github.com/edicl/flexi-streams
                :ip-interfaces ; [LLGPL] https://github.com/elliottslaughter/ip-interfaces
                :ironclad ; [BSD] https://github.com/sharplispers/ironclad
@@ -44,9 +45,11 @@
                 :components ((:file "package")
                              (:file "parameters")
                              (:file "utils")
+                             (:file "singleton-class")
                              (:file "delivery-address")
                              (:file "message")
                              (:file "worker")
+                             (:file "dispatcher")
                              (:file "receive")
                              ))))
 
