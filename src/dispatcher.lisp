@@ -10,31 +10,19 @@
 
 (in-package #:apis)
 
+;;; ---------------------------------------------------------------------
+;;; dead (undeliverable) messages
+;;; ---------------------------------------------------------------------
+
 (defparameter *dead-messages* (make-array 32 :initial-element nil :fill-pointer 0 :adjustable t))
 
 (defmethod file-dead-message ((message message))
-  (warn "Filing a dead message: ~S" message)
+  (log-message (format nil "Filing a dead message: ~S" message))
   (vector-push-extend message *dead-messages* 16))
 
-(defun get-local-ips ()
-  (let* ((local-interfaces (ip-interfaces:get-ip-interfaces))
-         (local-ips (mapcar (lambda (intf)(ip-interfaces:ip-interface-address intf))
-                            local-interfaces)))
-    (loop for ip in local-ips
-          collect (format nil "~A.~A.~A.~A"
-                          (elt ip 0)
-                          (elt ip 1)
-                          (elt ip 2)
-                          (elt ip 3)))))
-
-#+nil (get-local-ips)
-
-(defmethod localhost-address? ((addr string))
-  (or (and (equal "localhost" addr) t)
-      (and (member addr (get-local-ips) :test #'equalp) t)))
-
-#+nil (localhost-address? "127.0.0.1")
-#+nil (localhost-address? "192.168.0.64")
+;;; ---------------------------------------------------------------------
+;;; SINGLETON CLASS dispatcher
+;;; ---------------------------------------------------------------------
 
 (defclass dispatcher (worker)
   ()
@@ -57,6 +45,7 @@
 (defun reset-the-dispatcher ()
   (reset-singleton-class (find-class 'dispatcher)))
 
+;;; find the local worker that is the recipient of the message and deliver it
 (defmethod dispatch-message ((message message))
   (let* ((to-address (message-to message)))
     (cond
@@ -65,20 +54,19 @@
            (eq (the-dispatcher)
                (worker to-address)))
        (handle-received-operation (the-dispatcher) message (message-operation message)))
+
       ;; the host isn't local
       ((and (not (null (host to-address)))
-            (not (localhost-address? (host to-address))))
+            (not (localhost-ip-address? (host to-address))))
        (file-dead-message message))
-      ;; it's addressed to a worker by ID-string
-      ((stringp (worker to-address))(let ((receiver (identify-worker (worker to-address))))
-                                      (if receiver
-                                          (deliver-locally message receiver)
-                                          (file-dead-message message))))
+
+      ;; it's addressed to a worker by ID
+      ((typep (worker to-address) 'ksuid:ksuid)(let ((receiver (identify-worker (worker to-address))))
+                                                 (if receiver
+                                                     (deliver-locally message receiver)
+                                                     (file-dead-message message))))
       ;; the receiver is not the dispatcher or an identifiable worker
       (t (file-dead-message message)))))
-
-(defmethod handle-received-operation ((worker dispatcher) (msg message)(op symbol))
-  (format t "~%The apis dispatcher received a ~S message: ~S" op msg))
 
 
 #+nil (eq (the-dispatcher)(the-dispatcher))
@@ -91,8 +79,8 @@
 #+nil (defparameter $msg1 (make-instance 'message
                                          :to (delivery-address :host "192.168.0.64"
                                                                :port *message-receive-port*
-                                                               :worker (worker-id-string $w1))
+                                                               :worker (worker-id $w1))
                                          :operation :ping))
-#+nil (localhost-address? (host (message-to $msg1)))
+#+nil (localhost-ip-address? (host (message-to $msg1)))
 #+nil (worker (message-to $msg1))
 #+nil (dispatch-message $msg1)

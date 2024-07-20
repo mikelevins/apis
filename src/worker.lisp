@@ -97,16 +97,7 @@
       (bt:signal-semaphore (worker-message-semaphore worker)))))
 
 (defmethod deliver-remotely ((message message))
-  (format t "~%remote delivery not yet implemented"))
-
-(defmethod send ((message message))
-  (let ((to-address (message-to message)))
-    (cond ((or (null to-address)
-               (equal "127.0.0.1" to-address)
-               (equal "localhost" to-address))
-           (let ((worker (worker to-address)))
-             (deliver-locally message worker)))
-          (t (deliver-remotely message)))))
+  (log-message (format nil "~%remote delivery not yet implemented")))
 
 (defmethod identify-worker ((thing worker)) thing)
 (defmethod identify-worker ((thing string)) (find-local-worker thing))

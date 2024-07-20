@@ -18,14 +18,13 @@
 ;;; ---------------------------------------------------------------------
 
 #+nil (defparameter $w1 (make-instance 'worker :description "test worker 1"))
-#+nil (list-local-workers)
-#+nil (find-local-worker $w1)
-#+nil (find-local-worker (worker-id-string $w1))
 #+nil (bt:threadp (worker-message-thread $w1))
 #+nil (start-worker $w1)
 #+nil (stop-worker $w1)
 
 #+nil (defparameter $msg1 (make-instance 'message :to (delivery-address :worker $w1) :operation :ping))
+#+nil (describe $msg1)
+#+nil (describe (message-to $msg1))
 #+nil (send $msg1)
 
 #+nil (defparameter $jupiter "192.168.0.64")

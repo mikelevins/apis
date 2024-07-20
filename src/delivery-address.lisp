@@ -34,3 +34,9 @@
                  :worker worker))
 
 #+nil (delivery-address)
+
+(defmethod local-address? ((addr null)) t)
+
+(defmethod local-address? ((addr delivery-address))
+  (or (equal "127.0.0.1" (host addr))
+      (equal "localhost" (host addr))))
