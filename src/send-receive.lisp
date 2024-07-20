@@ -14,6 +14,8 @@
 ;;; GENERIC FUNCTION send message 
 ;;; ---------------------------------------------------------------------
 
+;;; BUG: need to make the postoffice's queues thread-safe
+
 (defmethod send ((message message))
   (let ((to-address (message-to message)))
     (if (local-address? to-address)
