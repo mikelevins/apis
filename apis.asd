@@ -51,6 +51,7 @@
                              (:file "message")
                              (:file "logger")
                              (:file "worker")
+                             (:file "postoffice")
                              (:file "send-receive")
                              ))))
 

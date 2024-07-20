@@ -35,6 +35,9 @@
 
 #+nil (delivery-address)
 
+(defmethod delivery-address? (thing) nil)
+(defmethod delivery-address? ((thing delivery-address)) t)
+
 (defmethod local-address? ((addr null)) t)
 
 (defmethod local-address? ((addr delivery-address))

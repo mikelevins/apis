@@ -17,23 +17,25 @@
 (defmethod send ((message message))
   (let ((to-address (message-to message)))
     (if (local-address? to-address)
-        (let ((worker (worker to-address)))
-          (deliver-locally message worker))
+        (deliver-locally message)
         (deliver-remotely message))))
 
-;;; deliver to nobody (i.e. to the apis process)
-(defmethod deliver-locally ((message message) (worker null))
-  (let ((op (message-operation msg)))
-    (handle-received-operation nil msg op)))
-
-(defmethod deliver-locally ((message message) (worker worker))
-  (let ((q (worker-message-queue worker)))
-    (bt:with-recursive-lock-held ((queues::lock-of q))
-      (queues:qpush q message)
-      (bt:signal-semaphore (worker-message-semaphore worker)))))
+(defmethod deliver-locally ((message message))
+  (let ((addr (message-to message)))
+    (if (delivery-address? addr)
+        (let ((worker (identify-worker (worker addr))))
+          (if worker
+              (let ((q (worker-message-queue worker)))
+                (bt:with-recursive-lock-held ((queues::lock-of q))
+                  (queues:qpush q message)
+                  (bt:signal-semaphore (worker-message-semaphore worker))))
+              (file-dead-message message)))
+        (file-dead-message message))))
 
 (defmethod deliver-remotely ((message message))
-  (log-message (format nil "~%remote delivery not yet implemented")))
+  (queues:qpush (postoffice-send-queue (the-postoffice)) 
+                message))
+
 
 ;;; ---------------------------------------------------------------------
 ;;; GENERIC FUNCTION receive message
