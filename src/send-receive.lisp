@@ -21,6 +21,20 @@
           (deliver-locally message worker))
         (deliver-remotely message))))
 
+;;; deliver to nobody (i.e. to the apis process)
+(defmethod deliver-locally ((message message) (worker null))
+  (let ((op (message-operation msg)))
+    (handle-received-operation nil msg op)))
+
+(defmethod deliver-locally ((message message) (worker worker))
+  (let ((q (worker-message-queue worker)))
+    (bt:with-recursive-lock-held ((queues::lock-of q))
+      (queues:qpush q message)
+      (bt:signal-semaphore (worker-message-semaphore worker)))))
+
+(defmethod deliver-remotely ((message message))
+  (log-message (format nil "~%remote delivery not yet implemented")))
+
 ;;; ---------------------------------------------------------------------
 ;;; GENERIC FUNCTION receive message
 ;;; ---------------------------------------------------------------------
@@ -38,8 +52,8 @@
 ;;; unrecognized operations
 ;;; ---------------------------------------------------------------------
 
-(defmethod handle-received-operation ((worker dispatcher) (msg message)(op symbol))
-  (log-message (format nil "~%The apis dispatcher received a ~S message: ~S" op msg)))
+(defmethod handle-received-operation ((worker null) (msg message)(op symbol))
+  (log-message (format nil "~%The apis process received a ~S message: ~S" op msg)))
 
 ;;; :ping and :ack
 ;;; ---------------------------------------------------------------------

@@ -86,19 +86,6 @@
 (defmethod worker-running? ((worker worker))
   (and (worker-message-thread worker) t))
 
-;;; deliver to nobody (i.e. to the apis process)
-(defmethod deliver-locally ((message message) (worker null))
-  (deliver-locally message (the-dispatcher)))
-
-(defmethod deliver-locally ((message message) (worker worker))
-  (let ((q (worker-message-queue worker)))
-    (bt:with-recursive-lock-held ((queues::lock-of q))
-      (queues:qpush q message)
-      (bt:signal-semaphore (worker-message-semaphore worker)))))
-
-(defmethod deliver-remotely ((message message))
-  (log-message (format nil "~%remote delivery not yet implemented")))
-
 (defmethod identify-worker ((thing worker)) thing)
 (defmethod identify-worker ((thing string)) (find-local-worker thing))
 (defmethod identify-worker ((thing integer)) (find-local-worker thing))

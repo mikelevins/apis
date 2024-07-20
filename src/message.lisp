@@ -44,3 +44,12 @@
 #+nil (describe $msg1)
 #+nil (describe (bytes->object (object->bytes $msg1)))
 
+;;; ---------------------------------------------------------------------
+;;; dead (undeliverable) messages
+;;; ---------------------------------------------------------------------
+
+(defparameter *dead-messages* (make-array 32 :initial-element nil :fill-pointer 0 :adjustable t))
+
+(defmethod file-dead-message ((message message))
+  (log-message (format nil "Filing a dead message: ~S" message))
+  (vector-push-extend message *dead-messages* 16))
