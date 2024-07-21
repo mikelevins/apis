@@ -18,16 +18,16 @@
 ;;; workers, message delivery
 ;;; ---------------------------------------------------------------------
 
-#+nil (defparameter $w1 (make-instance 'worker :description "test worker 1"))
+#+nil (defparameter $w1
+        (make-instance 'worker :description "test worker 1"
+                       :id (coerce #(19 43 49 22 209 197 130 168 120 139 61 59 207 89 75 132 142 158 239 170)
+                                   'ksuid:ksuid)))
 #+nil (bt:threadp (worker-message-thread $w1))
 #+nil (start-worker $w1)
 #+nil (stop-worker $w1)
 
 #+nil (defparameter $msg1 (make-instance 'message :to (delivery-address :worker $w1) :operation :ping))
-#+nil (describe $msg1)
-#+nil (describe (message-to $msg1))
 #+nil (send $msg1)
-
 
 #+nil (defparameter $jupiter "192.168.0.64")
 #+nil (defparameter $saturn "192.168.0.159")
