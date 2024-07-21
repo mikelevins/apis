@@ -6,6 +6,7 @@
 ;;; ---------------------------------------------------------------------
 
 #+nil (time (ksuid::make-ksuid))
+#+nil (ksuid::ksuid->string (ksuid::make-ksuid))
 
 ;;; serialization
 ;;; ---------------------------------------------------------------------
@@ -26,6 +27,8 @@
 #+nil (describe $msg1)
 #+nil (describe (message-to $msg1))
 #+nil (send $msg1)
+
+#+nil (describe (the-relayer))
 
 #+nil (defparameter $jupiter "192.168.0.64")
 #+nil (defparameter $saturn "192.168.0.159")
