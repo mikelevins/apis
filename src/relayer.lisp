@@ -88,13 +88,17 @@
                        (host (host addr))
                        (port (port addr))
                        (msg-bytes (object->bytes msg)))
-                  (clear-send-buffer relayer)
-                  (replace (send-buffer relayer) msg-bytes)
-                  (let ((out (usocket:socket-connect nil nil :protocol :datagram)))
-                    (usocket:socket-send out
-                                         (send-buffer relayer)
-                                         (length msg-bytes)
-                                         :host host
-                                         :port port)))
+                  (if (<= (length msg-bytes) *relayer-buffer-size*)
+                      ;; msg fits in a UDP packet; send it
+                      (progn (clear-send-buffer relayer)
+                             (replace (send-buffer relayer) msg-bytes)
+                             (let ((out (usocket:socket-connect nil nil :protocol :datagram)))
+                               (usocket:socket-send out
+                                                    (send-buffer relayer)
+                                                    (length msg-bytes)
+                                                    :host host
+                                                    :port port)))
+                      ;; msg does not fit in a UDP packet; drop it in *dead-messages* with an explanation
+                      (file-dead-message msg :explanation "Message too large for UDP transport")))
                 (file-dead-message msg)))))))
    :name "relayer send thread"))

@@ -26,7 +26,7 @@
 
 (defparameter *localhost* "127.0.0.1")
 (defparameter *message-receive-port* 10764)
-(defparameter *relayer-buffer-size* 65507) ; maximum payload size of a UDO packet
+(defparameter *relayer-buffer-size* 65507) ; maximum payload size of a UDP packet, in bytes
                                            ; (per https://en.wikipedia.org/wiki/User_Datagram_Protocol)
 (defparameter *default-message-time-to-live* 600) ; seconds
 
