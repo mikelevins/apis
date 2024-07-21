@@ -50,6 +50,7 @@
                              (:file "delivery-address")
                              (:file "message")
                              (:file "logger")
+                             (:file "dead-messages")
                              (:file "worker")
                              (:file "send-receive")
                              (:file "relayer")

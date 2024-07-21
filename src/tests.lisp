@@ -46,4 +46,6 @@
 #+nil (setf $e2 (bytes->object $bytes))
 #+nil (message $e2)
 
-
+#+nil (defparameter $msg3 (make-instance 'message :to nil :operation :ping))
+#+nil (send $msg3)
+#+nil (describe (elt *dead-messages* 0))

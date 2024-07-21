@@ -16,10 +16,14 @@
 
 
 (defclass message ()
-  ((id :reader message-id :initform (ksuid:make-ksuid) :initarg :id :type 'ksuid:ksuid)
+  (;; a vector of 20 bytes
+   (id :reader message-id :initform (ksuid:make-ksuid) :initarg :id :type 'ksuid:ksuid)
+   ;; a delivery-address
    (from :reader message-from :initform nil :initarg :from :type (or null delivery-address))
+   ;; a delivery-address
    (to :reader message-to :initform nil :initarg :to :type (or null delivery-address))
-   (operation :reader message-operation :initform :ping :initarg :operation)
+   ;; a keyword
+   (operation :reader message-operation :initform :ping :initarg :operation :type (or null symbol))
    (arguments :reader message-arguments :initform nil :initarg :arguments)
    (timestamp :reader message-timestamp :initform (local-time:now) :initarg :timestamp)
    (time-to-live :reader message-time-to-live :initform *default-message-time-to-live* :initarg :time-to-live)))
@@ -32,10 +36,10 @@
 
 
 (defmethod message-id-number ((msg message))
-  (ksuid:ksuid->integer (message-id worker)))
+  (ksuid:ksuid->integer (message-id msg)))
 
 (defmethod message-id-string ((msg message))
-  (ksuid:ksuid->string (message-id worker)))
+  (ksuid:ksuid->string (message-id msg)))
 
 
 #+nil (defparameter $msg1 (make-instance 'message
@@ -43,13 +47,3 @@
                                          :to (delivery-address)))
 #+nil (describe $msg1)
 #+nil (describe (bytes->object (object->bytes $msg1)))
-
-;;; ---------------------------------------------------------------------
-;;; dead (undeliverable) messages
-;;; ---------------------------------------------------------------------
-
-(defparameter *dead-messages* (make-array 32 :initial-element nil :fill-pointer 0 :adjustable t))
-
-(defmethod file-dead-message ((message message))
-  (log-message (format nil "Filing a dead message: ~S" message))
-  (vector-push-extend message *dead-messages* 16))
