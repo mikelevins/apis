@@ -21,9 +21,9 @@
 
 (defmethod log-message ((msg string))
   (when *print-logged-messages*
-    (format t "~%~A" msg)))
+    (format *debug-io* "~%~A" msg)))
 
 (defmethod log-message ((msg message))
   (when *print-logged-messages*
-    (format t "~% Logging message: ~S" msg))
+    (format *debug-io* "~% Logging message: ~S" msg))
   (vector-push-extend msg (logger-messages (the-logger))))

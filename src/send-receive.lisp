@@ -35,8 +35,7 @@
         (file-dead-message message))))
 
 (defmethod deliver-remotely ((message message))
-  (queues:qpush (postoffice-send-queue (the-postoffice)) 
-                message))
+  (log-message "deliver-remotely is not yet implemented"))
 
 
 ;;; ---------------------------------------------------------------------
