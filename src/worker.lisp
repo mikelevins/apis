@@ -71,7 +71,7 @@
             for msg = (queues:qpop (worker-message-queue worker))
             while msg
             do (receive msg))))
-   :name (or thread-name (format nil "message thread" worker))))
+   :name (or thread-name (format nil "message thread [~A]" (worker-id-string worker)))))
 
 (defmethod start-worker ((worker worker))
   (unless (bt:threadp (worker-message-thread worker))

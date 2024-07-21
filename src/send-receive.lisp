@@ -35,7 +35,10 @@
         (file-dead-message message))))
 
 (defmethod deliver-remotely ((message message))
-  (log-message "deliver-remotely is not yet implemented"))
+  (let ((q (send-queue (the-relayer))))
+    (bt:with-recursive-lock-held ((queues::lock-of q))
+      (queues:qpush q message)
+      (bt:signal-semaphore (send-semaphore (the-relayer))))))
 
 
 ;;; ---------------------------------------------------------------------

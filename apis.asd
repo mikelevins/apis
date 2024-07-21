@@ -51,8 +51,8 @@
                              (:file "message")
                              (:file "logger")
                              (:file "worker")
-                             (:file "relayer")
                              (:file "send-receive")
+                             (:file "relayer")
                              ))))
 
 ;;; (asdf:load-system :apis)
