@@ -18,10 +18,11 @@
 ;;; workers, message delivery
 ;;; ---------------------------------------------------------------------
 
+#+nil (defparameter $w1-id (coerce #(19 43 49 22 209 197 130 168 120 139 61 59 207 89 75 132 142 158 239 170)
+                                   'ksuid:ksuid))
 #+nil (defparameter $w1
         (make-instance 'worker :description "test worker 1"
-                       :id (coerce #(19 43 49 22 209 197 130 168 120 139 61 59 207 89 75 132 142 158 239 170)
-                                   'ksuid:ksuid)))
+                       :id $w1-id))
 #+nil (bt:threadp (worker-message-thread $w1))
 #+nil (start-worker $w1)
 #+nil (stop-worker $w1)
@@ -32,7 +33,7 @@
 #+nil (defparameter $jupiter "192.168.0.64")
 #+nil (defparameter $saturn "192.168.0.159")
 #+nil (defparameter $msg2 (make-instance 'message
-                                         :to (delivery-address :host $saturn :worker "2jLVM21qFXkITB5Ro48Ac2gf9bM")
+                                         :to (delivery-address :host $saturn :port *message-receive-port* :worker $w1-id)
                                          :operation :ping))
 #+nil (describe (the-relayer))
 #+nil (start-relayer (the-relayer))
@@ -49,3 +50,5 @@
 #+nil (defparameter $msg3 (make-instance 'message :to nil :operation :ping))
 #+nil (send $msg3)
 #+nil (describe (elt *dead-messages* 0))
+
+#+nil *dead-messages*
