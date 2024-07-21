@@ -5,8 +5,8 @@
 ;;; identifiers
 ;;; ---------------------------------------------------------------------
 
-#+nil (time (ksuid::make-ksuid))
-#+nil (ksuid::ksuid->string (ksuid::make-ksuid))
+#+nil (time (ksuid:make-ksuid))
+#+nil (ksuid:ksuid->string (ksuid:make-ksuid))
 
 ;;; serialization
 ;;; ---------------------------------------------------------------------

@@ -17,7 +17,7 @@
 (defparameter *local-workers* (make-hash-table :test 'equal))
 
 (defclass worker ()
-  ((id :reader worker-id :initform (ksuid::make-ksuid) :initarg :id)
+  ((id :reader worker-id :initform (ksuid:make-ksuid) :initarg :id)
    (description :reader worker-description :initform nil :initarg :description)
    (message-queue :accessor worker-message-queue :initform (make-instance 'queues:simple-cqueue))
    (message-thread :accessor worker-message-thread :initform nil :initarg :message-thread)
@@ -31,17 +31,17 @@
     (setf (gethash idstr *local-workers*) instance)))
 
 (defmethod worker-id-number ((worker worker))
-  (ksuid::ksuid->integer (worker-id worker)))
+  (ksuid:ksuid->integer (worker-id worker)))
 
 (defmethod worker-id-string ((worker worker))
-  (ksuid::ksuid->string (worker-id worker)))
+  (ksuid:ksuid->string (worker-id worker)))
 
 (defmethod workerp (thing) nil)
 (defmethod workerp ((thing worker)) t)
 
 (defmethod print-object ((obj worker) stream)
   (print-unreadable-object (obj stream :type t :identity nil)
-    (format stream "~X" (ksuid::ksuid->string (worker-id obj)))
+    (format stream "~X" (ksuid:ksuid->string (worker-id obj)))
     (when (worker-description obj)
       (format stream " ~S" (worker-description obj)))
     (when (and (worker-message-thread obj)
