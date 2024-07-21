@@ -14,7 +14,7 @@
 ;;; CLASS worker
 ;;; ---------------------------------------------------------------------
 
-(defparameter *local-workers* (make-hash-table :test 'equal))
+(defparameter *local-workers* (make-hash-table :test 'equalp))
 
 (defclass worker ()
   ((id :reader worker-id :initform (ksuid:make-ksuid) :initarg :id)
@@ -25,10 +25,10 @@
    (messages-waiting-for-reply :initform (make-hash-table) :initarg :messages-waiting-for-reply)))
 
 (defmethod initialize-instance :after ((instance worker) &rest initargs &key &allow-other-keys)
-  (let* ((idstr (worker-id-string instance))
-         (already-worker (gethash idstr *local-workers* nil)))
-    (assert (null already-worker)() "There is already a worker with ID ~S" idstr)
-    (setf (gethash idstr *local-workers*) instance)))
+  (let* ((id (worker-id instance))
+         (already-worker (gethash id *local-workers* nil)))
+    (assert (null already-worker)() "There is already a worker with ID ~S" id)
+    (setf (gethash id *local-workers*) instance)))
 
 (defmethod worker-id-number ((worker worker))
   (ksuid:ksuid->integer (worker-id worker)))
@@ -56,12 +56,6 @@
   (loop for v being the hash-values in *local-workers*
         collect v))
 
-(defmethod find-local-worker ((id string))
-  (gethash id *local-workers* nil))
-
-(defmethod find-local-worker ((worker worker))
-  worker)
-
 (defmethod make-worker-message-thread ((worker worker) &key thread-name)
   (bt:make-thread
    (lambda ()
@@ -86,6 +80,14 @@
 (defmethod worker-running? ((worker worker))
   (and (worker-message-thread worker) t))
 
-(defmethod identify-worker ((thing worker)) thing)
-(defmethod identify-worker ((thing string)) (find-local-worker thing))
-(defmethod identify-worker ((thing integer)) (find-local-worker thing))
+(defmethod identify-worker ((thing worker))
+  thing)
+
+(defmethod identify-worker ((thing vector))
+  (gethash thing *local-workers* nil))
+
+(defmethod identify-worker ((thing string))
+  (gethash (ksuid:string->ksuid thing) *local-workers* nil))
+
+(defmethod identify-worker ((thing integer))
+  (gethash (ksuid:integer->ksuid thing) *local-workers* nil))
