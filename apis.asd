@@ -34,7 +34,6 @@
                :net.bardcode.ksuid ; [Apache 2.0] https://github.com/mikelevins/net.bardcode.ksuid
                :net.bardcode.literals ; [Apache 2.0] https://github.com/mikelevins/net.bardcode.literals
                :net.bardcode.nodeid ; [Apache 2.0] https://github.com/mikelevins/net.bardcode.nodeid
-               :org.tfeb.hax.singleton-classes ; [MIT] https://github.com/tfeb/tfeb-lisp-hax
                :osicat ; [MIT] https://github.com/osicat/osicat
                :queues ; [MIT] https://github.com/oconnore/queues 
                :queues.simple-cqueue ; [MIT] https://github.com/oconnore/queues 

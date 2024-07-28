@@ -9,7 +9,7 @@
 ;;;; ***********************************************************************
 
 (defpackage #:apis
-  (:use #:cl #:org.tfeb.hax.singleton-classes)
+  (:use #:cl)
   (:export
    #:handle-message
    #:handle-message-operation
