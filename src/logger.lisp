@@ -14,7 +14,7 @@
 
 (defclass logger ()
   ((messages :accessor logger-messages :initform (make-array 16 :fill-pointer 0 :adjustable t)))
-  (:metaclass singleton-class))
+  (:metaclass singleton))
 
 (defun the-logger ()
   (make-instance 'logger))

@@ -9,7 +9,7 @@
 ;;;; ***********************************************************************
 
 (defpackage #:apis
-  (:use #:cl)
+  (:use #:cl #:singleton)
   (:export
    #:handle-message
    #:handle-message-operation

@@ -29,7 +29,7 @@
                                       :initial-element 0))
    (send-thread :accessor send-thread :initform nil)
    (send-semaphore :accessor send-semaphore :initform (bt:make-semaphore :name "send semaphore") ))
-  (:metaclass singleton-class))
+  (:metaclass singleton))
 
 (defun the-relayer () (make-instance 'relayer))
 
