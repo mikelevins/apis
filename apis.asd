@@ -24,12 +24,14 @@
   :license "Apache 2.0"
   :version (:read-file-form "version.lisp")
   :depends-on (
-               :local-time ; [MIT] https://github.com/dlowe-net/local-time?tab=License-1-ov-file#readme
+               :local-time ; [MIT] https://github.com/dlowe-net/local-time
+               :bordeaux-threads ; [MIT] https://github.com/sionescu/bordeaux-threads
                :queues.simple-cqueue ; [MIT] https://github.com/oconnore/queues 
                )
   :components ((:module "src"
                 :serial t
                 :components ((:file "package")
-                             ))))
+                             (:file "parameters")
+                             (:file "worker")))))
 
 ;;; (asdf:load-system :apis)
