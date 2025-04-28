@@ -14,11 +14,9 @@
 ;;; CLASS worker
 ;;; ---------------------------------------------------------------------
 
-(defparameter *local-workers* (make-hash-table :test 'equalp))
-
 (defun make-worker-id (&key time random-integer)
-  (cons (or time (get-universal-time))
-        (or random-integer (random most-positive-fixnum *id-random-state*))))
+  (+ (ash (or time (get-universal-time)) 32)
+     (or random-integer (random #xFFFFFFFF *id-random-state*))))
 
 (defclass worker ()
   ((id :reader worker-id :initform (make-worker-id) :initarg :id)
@@ -29,3 +27,5 @@
    (messages-waiting-for-reply :initform (make-hash-table) :initarg :messages-waiting-for-reply)))
 
 #+test (defparameter $w1 (make-instance 'worker))
+#+test (integer-length (worker-id $w1))
+#+test (time (loop for i from 0 below 1000000 do (make-worker-id)))
