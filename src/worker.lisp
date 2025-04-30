@@ -30,7 +30,7 @@
   (format t "~% worker ~S received message ~S" worker msg))
 
 (defmethod start ((worker worker) &key thread-name &allow-other-keys)
-  (let* ((thread-name (or thread-name (format nil "thread (~X)" (id worker))))
+  (let* ((thread-name (or thread-name (format nil "message thread (~X)" (id worker))))
          (thread (bt:make-thread
                   (lambda ()
                     (loop ; loop forever
