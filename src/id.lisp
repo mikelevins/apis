@@ -1,14 +1,15 @@
 ;;;; ***********************************************************************
 ;;;;
-;;;; Name:          parameters.lisp
+;;;; Name:          id.lisp
 ;;;; Project:       the apis message-passing system
-;;;; Purpose:       system parameters
+;;;; Purpose:       simple compact ids
 ;;;; Author:        mikel evins
-;;;; Copyright:     2015-2025 by mikel evins
+;;;; Copyright:     2025 by mikel evins
 ;;;;
 ;;;; ***********************************************************************
 
 (in-package #:apis)
 
-(defparameter *id-random-state* (make-random-state t))
-(defparameter *default-message-time-to-live* 600) ; seconds
+(defun makeid (&key time random-integer)
+  (+ (ash (or time (get-universal-time)) 32)
+     (or random-integer (random #xFFFFFFFF *id-random-state*))))

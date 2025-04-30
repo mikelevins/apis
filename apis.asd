@@ -24,7 +24,6 @@
   :license "Apache 2.0"
   :version (:read-file-form "version.lisp")
   :depends-on (
-               :local-time ; [MIT] https://github.com/dlowe-net/local-time
                :bordeaux-threads ; [MIT] https://github.com/sionescu/bordeaux-threads
                :queues.simple-cqueue ; [MIT] https://github.com/oconnore/queues 
                )
@@ -32,6 +31,10 @@
                 :serial t
                 :components ((:file "package")
                              (:file "parameters")
-                             (:file "worker")))))
+                             (:file "id")
+                             (:file "message")
+                             (:file "worker")
+                             (:file "recipient")
+                             ))))
 
 ;;; (asdf:load-system :apis)
