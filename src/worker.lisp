@@ -26,8 +26,20 @@
 #+repl (integer-length (id $w1))
 #+repl (time (loop for i from 0 below 1000000 do (makeid)))
 
+(define-condition unhandled-message (error)
+  ((message :initarg :message :reader unhandled-message)))
+
+(defmethod handle-message ((worker worker)(msg message) op args)
+  "Default method: signal an UNHANDLED-MESSAGE error"
+  (error 'unhandled-message :message msg))
+
+(defmethod handle-message ((worker worker)(msg message) (op (eql :ping)) args)
+  (format t "~%~S received a :PING message (~S)" worker msg))
+
 (defmethod receive ((worker worker)(msg message))
-  (format t "~% worker ~S received message ~S" worker msg))
+  (let ((op (message-operation msg))
+        (args (message-arguments msg)))
+    (handle-message worker msg op args)))
 
 (defmethod start ((worker worker) &key thread-name &allow-other-keys)
   (let* ((thread-name (or thread-name (format nil "message thread (~X)" (id worker))))
@@ -51,4 +63,5 @@
 #+repl (describe $w1)
 #+repl (start $w1)
 #+repl (send (message :from t :to $w1))
+#+repl (send (message :from t :to $w1 :operation :frob))
 #+repl (stop $w1)
