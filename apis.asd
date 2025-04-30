@@ -34,6 +34,7 @@
                              (:file "id")
                              (:file "message")
                              (:file "worker")
+                             (:file "service-worker")
                              (:file "recipient")
                              ))))
 
