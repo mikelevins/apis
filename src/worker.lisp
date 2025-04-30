@@ -50,4 +50,5 @@
 #+repl (defparameter $w1 (make-instance 'worker))
 #+repl (describe $w1)
 #+repl (start-worker $w1)
+#+repl (send (message :from t :to $w1))
 #+repl (stop-worker $w1)
