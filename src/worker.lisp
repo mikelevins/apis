@@ -62,13 +62,13 @@
     (when thread
       (bt:destroy-thread thread))))
 
-(defmethod worker-running? ((worker worker))
+(defmethod running? ((worker worker))
   (bordeaux-threads:threadp (message-thread worker)))
 
 #+repl (defparameter $w1 (make-instance 'worker))
 #+repl (describe $w1)
 #+repl (start $w1)
-#+repl (worker-running? $w1)
+#+repl (running? $w1)
 #+repl (send (message :from t :to $w1))
 #+repl (send (message :from t :to $w1 :operation :frob))
 #+repl (stop $w1)
