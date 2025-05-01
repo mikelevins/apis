@@ -29,17 +29,20 @@
 (define-condition unhandled-message (error)
   ((message :initarg :message :reader unhandled-message)))
 
-(defmethod handle-message ((worker worker)(msg message) op args)
+(defmethod handle-message ((worker worker)(msg message) op arg)
   "Default method: signal an UNHANDLED-MESSAGE error"
   (error 'unhandled-message :message msg))
 
-(defmethod handle-message ((worker worker)(msg message) (op (eql :ping)) args)
+(defmethod handle-message ((worker worker)(msg message) (op (eql :ping)) arg)
   (format t "~%~S received a :PING message (~S)" worker msg))
 
 (defmethod receive ((worker worker)(msg message))
   (let ((op (message-operation msg))
-        (args (message-arguments msg)))
-    (handle-message worker msg op args)))
+        (arg (message-argument msg)))
+    (handler-case (handle-message worker msg op arg)
+      (unhandled-message (err)
+        (warn "received ~S message not handled (~S)" op msg)
+        nil))))
 
 (defmethod start ((worker worker) &key thread-name &allow-other-keys)
   (let* ((thread-name (or thread-name (format nil "message thread (~X)" (id worker))))

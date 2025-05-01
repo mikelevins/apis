@@ -23,7 +23,7 @@
    (to :reader message-to :initform nil :initarg :to)
    ;; a keyword
    (operation :reader message-operation :initform :ping :initarg :operation :type (or null symbol))
-   (arguments :reader message-arguments :initform nil :initarg :arguments :type (or null list))
+   (argument :reader message-argument :initform nil :initarg :argument :type (or null list))
    (timestamp :reader message-timestamp :initform (get-universal-time) :initarg :timestamp :type 'integer)
    (time-to-live :reader message-time-to-live
                  :initform *default-message-time-to-live* :initarg :time-to-live :type 'integer)))
@@ -34,9 +34,9 @@
             (message-id obj)
             (message-operation obj))))
 
-(defun message (&key (id (makeid)) from to (operation :ping) arguments
+(defun message (&key (id (makeid)) from to (operation :ping) argument
                   (timestamp (get-universal-time))(time-to-live *default-message-time-to-live*))
-  (make-instance 'message :id id :from from :to to :operation operation :arguments arguments
+  (make-instance 'message :id id :from from :to to :operation operation :argument argument
                           :timestamp timestamp :time-to-live time-to-live))
 
 
