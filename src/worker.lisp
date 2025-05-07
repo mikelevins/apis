@@ -45,6 +45,7 @@
         nil))))
 
 (defmethod start ((worker worker) &key thread-name &allow-other-keys)
+  "Starts the worker's message thread."
   (let* ((thread-name (or thread-name (format nil "message thread (~X)" (id worker))))
          (thread (bt:make-thread
                   (lambda ()
@@ -58,6 +59,7 @@
     (setf (message-thread worker) thread)))
 
 (defmethod stop ((worker worker))
+  "Stops and destroys the worker's message thread."
   (let ((thread (shiftf (message-thread worker) nil)))
     (when thread
       (bt:destroy-thread thread))))
