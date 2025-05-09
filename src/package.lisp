@@ -11,5 +11,13 @@
 (defpackage #:apis
   (:use #:cl)
   (:export
-   ))
+   #:handle-message
+   #:id
+   #:message
+   #:message-thread
+   #:running?
+   #:send
+   #:start
+   #:stop
+   #:worker))
 
