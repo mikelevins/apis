@@ -16,7 +16,7 @@
 
 (defclass message ()
   (;; a vector of 20 bytes
-   (id :reader message-id :initform (makeid) :initarg :id :type 'integer)
+   (id :reader message-id :initform (makeid) :initarg :id :type integer)
    ;; a delivery-address
    (from :reader message-from :initform nil :initarg :from)
    ;; a delivery-address
@@ -24,9 +24,9 @@
    ;; a keyword
    (operation :reader message-operation :initform :ping :initarg :operation :type (or null symbol))
    (argument :reader message-argument :initform nil :initarg :argument :type (or null list))
-   (timestamp :reader message-timestamp :initform (get-universal-time) :initarg :timestamp :type 'integer)
+   (timestamp :reader message-timestamp :initform (get-universal-time) :initarg :timestamp :type integer)
    (time-to-live :reader message-time-to-live
-                 :initform *default-message-time-to-live* :initarg :time-to-live :type 'integer)))
+                 :initform *default-message-time-to-live* :initarg :time-to-live :type integer)))
 
 (defmethod print-object ((obj message) out-stream)
   (print-unreadable-object (obj out-stream :type t :identity nil)

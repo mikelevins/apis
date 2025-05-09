@@ -35,7 +35,6 @@
                              (:file "message")
                              (:file "worker")
                              (:file "service-worker")
-                             (:file "recipient")
                              ))))
 
 ;;; (asdf:load-system :apis)
