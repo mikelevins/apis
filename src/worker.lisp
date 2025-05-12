@@ -21,6 +21,12 @@
    (message-semaphore :accessor message-semaphore :initform (bt:make-semaphore :name "message semaphore") )
    (message-thread :accessor message-thread :initform nil :initarg :message-thread)))
 
+(defmethod print-object ((worker worker) stream)
+  (print-unreadable-object (worker stream :type t :identity nil)
+    (if (running? worker)
+        (format stream "[running]")
+        (format stream "[stopped]"))))
+
 #+repl (defparameter $w1 (make-instance 'worker))
 #+repl (describe $w1)
 #+repl (integer-length (id $w1))
