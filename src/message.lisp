@@ -30,9 +30,12 @@
 
 (defmethod print-object ((obj message) out-stream)
   (print-unreadable-object (obj out-stream :type t :identity nil)
-    (format out-stream "~X ~S"
+    (format out-stream "~X from: ~S to: ~S ~S ~S"
             (message-id obj)
-            (message-operation obj))))
+            (message-from obj)
+            (message-to obj)
+            (message-operation obj)
+            (message-argument obj))))
 
 (defun message (&key (id (makeid)) from to (operation :ping) argument
                   (timestamp (get-universal-time))(time-to-live *default-message-time-to-live*))
