@@ -1,4 +1,4 @@
-;;;; ***********************************************************************
+;;; ***********************************************************************
 ;;;;
 ;;;; Name:          worker.lisp
 ;;;; Project:       the apis message-passing system
@@ -35,17 +35,17 @@
 (define-condition unhandled-message (error)
   ((message :initarg :message :reader unhandled-message)))
 
-(defmethod handle-message ((worker worker)(msg message) op arg)
+(defmethod handle-message ((worker worker)(msg message) op data)
   "Default method: signal an UNHANDLED-MESSAGE error"
   (error 'unhandled-message :message msg))
 
-(defmethod handle-message ((worker worker)(msg message) (op (eql :ping)) arg)
+(defmethod handle-message ((worker worker)(msg message) (op (eql :ping)) data)
   (format t "~%~S received a :PING message (~S)" worker msg))
 
 (defmethod receive ((worker worker)(msg message))
   (let ((op (message-operation msg))
-        (arg (message-argument msg)))
-    (handler-case (handle-message worker msg op arg)
+        (data (message-data msg)))
+    (handler-case (handle-message worker msg op data)
       (unhandled-message (err)
         (warn "received ~S message not handled (~S)" op msg)
         nil))))

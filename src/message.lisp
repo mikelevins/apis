@@ -17,29 +17,29 @@
 (defclass message ()
   (;; a vector of 20 bytes
    (id :reader message-id :initform (makeid) :initarg :id :type integer)
-   ;; a delivery-address
+   ;; a worker
    (from :reader message-from :initform nil :initarg :from)
-   ;; a delivery-address
+   ;; a worker
    (to :reader message-to :initform nil :initarg :to)
    ;; a keyword
    (operation :reader message-operation :initform :ping :initarg :operation :type (or null symbol))
-   (argument :reader message-argument :initform nil :initarg :argument :type (or null list))
+   (data :reader message-data :initform nil :initarg :data :type (or null list))
    (timestamp :reader message-timestamp :initform (get-universal-time) :initarg :timestamp :type integer)
    (time-to-live :reader message-time-to-live
                  :initform *default-message-time-to-live* :initarg :time-to-live :type integer)))
 
 (defmethod print-object ((obj message) out-stream)
-  (print-unreadable-object (obj out-stream :type t :identity nil)
-    (format out-stream "~X from: ~S to: ~S ~S ~S"
-            (message-id obj)
-            (message-from obj)
-            (message-to obj)
+  (print-unreadable-object (obj out-stream :type nil :identity nil)
+    (format out-stream "message ~X from: ~S to: ~S ~S ~S"
+            (type-of obj)
+            (type-of (message-from obj))
+            (type-of (message-to obj))
             (message-operation obj)
-            (message-argument obj))))
+            (message-data obj))))
 
-(defun message (&key (id (makeid)) from to (operation :ping) argument
+(defun message (&key (id (makeid)) from to (operation :ping) data
                   (timestamp (get-universal-time))(time-to-live *default-message-time-to-live*))
-  (make-instance 'message :id id :from from :to to :operation operation :argument argument
+  (make-instance 'message :id id :from from :to to :operation operation :data data
                           :timestamp timestamp :time-to-live time-to-live))
 
 
