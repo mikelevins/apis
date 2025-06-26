@@ -24,7 +24,7 @@
    ;; a keyword
    (operation :reader message-operation :initform :ping :initarg :operation :type (or null symbol))
    ;; a plist
-   (data :reader message-data :initform nil :initarg :data :type (or null list))
+   (data :reader message-data :initform nil :initarg :data)
    (timestamp :reader message-timestamp :initform (get-universal-time) :initarg :timestamp :type integer)
    (time-to-live :reader message-time-to-live
                  :initform *default-message-time-to-live* :initarg :time-to-live :type integer)))
