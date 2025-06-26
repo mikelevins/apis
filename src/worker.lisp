@@ -18,7 +18,9 @@
   ((id :reader id :initform (makeid) :initarg :id)
    (description :reader description :initform nil :initarg :description)
    (message-queue :accessor message-queue :initform (make-instance 'queues:simple-cqueue))
-   (message-semaphore :accessor message-semaphore :initform (bt:make-semaphore :name "message semaphore") )
+   (message-semaphore :accessor message-semaphore
+                      :initform (bt:make-semaphore :name "message semaphore")
+                      :initarg :message-semaphore)
    (message-thread :accessor message-thread :initform nil :initarg :message-thread)))
 
 (defmethod print-object ((worker worker) stream)
