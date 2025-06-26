@@ -11,13 +11,20 @@
 (defpackage #:apis
   (:use #:cl)
   (:export
+   #:description
    #:handle-message
    #:id
    #:message
+   #:message-data
+   #:message-operation
+   #:message-queue
+   #:message-semaphore
    #:message-thread
+   #:receive
    #:running?
    #:send
    #:start
    #:stop
+   #:unhandled-message
    #:worker))
 
