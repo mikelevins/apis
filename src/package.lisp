@@ -14,12 +14,15 @@
    #:description
    #:handle-message
    #:id
+   #:makeid
    #:message
    #:message-data
+   #:message-from
    #:message-operation
    #:message-queue
    #:message-semaphore
    #:message-thread
+   #:message-to
    #:receive
    #:running?
    #:send
