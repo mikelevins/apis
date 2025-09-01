@@ -34,5 +34,7 @@
                                   (loop
                                     (progn (sleep 2)
                                            (format t "~%running ~S service thread" worker)))))
+#+repl (send (message :from t :to nil))
 #+repl (send (message :from t :to $s1))
+#+repl (send (message :from nil :to $s1))
 #+repl (stop $s1)

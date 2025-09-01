@@ -15,9 +15,8 @@
 ;;; ---------------------------------------------------------------------
 
 (defclass message ()
-  (;; a vector of 20 bytes
-   (id :reader message-id :initform (makeid) :initarg :id :type integer)
-   ;; a worker
+  ((id :reader message-id :initform (makeid) :initarg :id :type integer)
+   ;; a worker or nil
    (from :reader message-from :initform nil :initarg :from)
    ;; a worker
    (to :reader message-to :initform nil :initarg :to)
@@ -33,8 +32,8 @@
   (print-unreadable-object (obj out-stream :type nil :identity nil)
     (format out-stream "message ~X from: ~S to: ~S ~S ~S"
             (type-of obj)
-            (type-of (message-from obj))
-            (type-of (message-to obj))
+            (message-from obj)
+            (message-to obj)
             (message-operation obj)
             (message-data obj))))
 

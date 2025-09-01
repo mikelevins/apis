@@ -13,3 +13,5 @@
 (defun makeid (&key time random-integer)
   (+ (ash (or time (get-universal-time)) 32)
      (or random-integer (random #xFFFFFFFF *id-random-state*))))
+
+#+repl (integer-length (makeid))
