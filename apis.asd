@@ -26,7 +26,7 @@
   :depends-on (
                :bordeaux-threads ; [MIT] https://github.com/sionescu/bordeaux-threads
                :queues.simple-cqueue ; [MIT] https://github.com/oconnore/queues
-               :net.bardcode.threadpool ; [Apache 2.0] https://github.com/mikelevins/net.bardcode.threadpool
+               :threadpool ; [Apache 2.0] https://github.com/mikelevins/net.bardcode.threadpool
                )
   :components ((:module "src"
                 :serial t
