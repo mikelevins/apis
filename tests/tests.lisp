@@ -214,6 +214,29 @@
     (check-equal (1+ before) (length apis:*dead-letters*)
                  "dead letter should be recorded for unknown worker")))
 
+(define-test send-dead-letter-nil-to
+  (let ((before (length apis:*dead-letters*))
+        (msg (apis:message :to nil :operation :test)))
+    (apis:send msg)
+    (check-equal (1+ before) (length apis:*dead-letters*)
+                 "dead letter should be recorded when TO is nil")
+    (check (search "no recipient"
+                   (string-downcase (car (aref apis:*dead-letters*
+                                              (1- (length apis:*dead-letters*))))))
+           "dead letter reason should mention no recipient")))
+
+(define-test send-dead-letter-remote-address
+  (let ((before (length apis:*dead-letters*))
+        (msg (apis:message :to "apis://remote-host:9100/01ARZ3NDEKTSV4RRFFQ69G5FAV"
+                           :operation :test)))
+    (apis:send msg)
+    (check-equal (1+ before) (length apis:*dead-letters*)
+                 "dead letter should be recorded for remote address")
+    (check (search "no transport"
+                   (string-downcase (car (aref apis:*dead-letters*
+                                              (1- (length apis:*dead-letters*))))))
+           "dead letter reason should mention no transport")))
+
 (defvar *delivery-result* nil)
 
 (defmethod apis:handle-message ((w test-worker) msg (op (eql :delivery-test)) data)
@@ -237,6 +260,35 @@
       ;; restore the default runtime
       (setf apis:*default-runtime*
             (apis:make-runtime :thread-count apis:*default-runtime-thread-count*)))))
+
+(define-test send-delivers-via-local-uri
+  (let ((rt (apis:make-runtime :thread-count 2)))
+    (setf apis:*default-runtime* rt)
+    (unwind-protect
+         (progn
+           (setf *delivery-result* nil)
+           (let* ((w (make-instance 'test-worker))
+                  (uri (apis:format-address (apis:worker-id w))))
+             (apis:start-runtime rt)
+             (apis:send (apis:message :to uri
+                                      :operation :delivery-test
+                                      :data '(:payload "via-uri")))
+             (sleep 0.2)
+             (check-equal "via-uri" *delivery-result*
+                          "handler should receive message sent to local URI")
+             (apis:stop-runtime rt)))
+      (setf apis:*default-runtime*
+            (apis:make-runtime :thread-count apis:*default-runtime-thread-count*)))))
+
+(define-test send-dead-letter-unknown-local-uri
+  ;; A local URI whose worker-id is not registered should dead-letter
+  (let* ((unknown-id (apis:makeid))
+         (uri (apis:format-address unknown-id))
+         (before (length apis:*dead-letters*))
+         (msg (apis:message :to uri :operation :test)))
+    (apis:send msg)
+    (check-equal (1+ before) (length apis:*dead-letters*)
+                 "dead letter should be recorded for unknown local URI")))
 
 ;;; =====================================================================
 ;;; Integration: the smoke test

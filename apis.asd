@@ -35,8 +35,8 @@
                              (:file "id")
                              (:file "message")
                              (:file "worker")
-                             (:file "runtime")
                              (:file "addressing")
+                             (:file "runtime")
                              (:file "serialization")
                              ))))
 

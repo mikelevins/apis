@@ -158,21 +158,14 @@ worker to :idle. Declined with a warning if the runtime is running."
 ;;; send
 ;;; ---------------------------------------------------------------------
 
-(defgeneric send (message)
-  (:documentation "Deliver a message to the worker named by its TO field.
-If the target worker is not found, the message is filed as a dead letter."))
-
-(defmethod send ((msg message))
-  (let* ((runtime *default-runtime*)
-         (target-id (message-to msg))
-         (worker (when (and runtime target-id)
-                   (find-worker target-id runtime))))
+(defun deliver-locally (msg worker-id runtime)
+  "Deliver MSG to the worker identified by WORKER-ID in RUNTIME.
+If the worker is not found, file as a dead letter."
+  (let ((worker (find-worker worker-id runtime)))
     (cond
-      ((null runtime)
-       (file-dead-letter msg "No runtime available."))
       ((null worker)
        (file-dead-letter msg (format nil "Worker ~A not found."
-                                     (if target-id (format-id target-id) "nil"))))
+                                     (format-id worker-id))))
       (t
        ;; push onto the worker's message queue (thread-safe)
        (queues:qpush (worker-message-queue worker) msg)
@@ -182,6 +175,37 @@ If the target worker is not found, the message is filed as a dead letter."))
            (setf (worker-state worker) :ready)
            (queues:qpush (runtime-ready-queue runtime) worker)
            (bt:condition-notify (runtime-ready-condvar runtime))))))))
+
+(defgeneric send (message)
+  (:documentation "Deliver a message to the worker named by its TO field.
+Dispatches on address type: integer (local ULID), string (URI, local
+or remote), or nil.  If the target worker is not found, or the address
+is remote and no transport is configured, the message is filed as a
+dead letter."))
+
+(defmethod send ((msg message))
+  (let ((runtime *default-runtime*))
+    (cond
+      ((null runtime)
+       (file-dead-letter msg "No runtime available."))
+      (t
+       (let ((target (message-to msg)))
+         (etypecase target
+           (null
+            (file-dead-letter msg "Message has no recipient (TO is nil)."))
+           (integer
+            (deliver-locally msg target runtime))
+           (string
+            (multiple-value-bind (host port worker-id)
+                (parse-address target)
+              (declare (ignore port))
+              (if host
+                  ;; Remote address — no transport layer yet
+                  (file-dead-letter
+                   msg (format nil "No transport configured for remote address ~A."
+                               target))
+                  ;; Local URI — resolve to worker-id and deliver
+                  (deliver-locally msg worker-id runtime))))))))))
 
 ;;; ---------------------------------------------------------------------
 ;;; default runtime
