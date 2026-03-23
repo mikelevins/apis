@@ -52,10 +52,30 @@
    ;; Dead letters
    #:*dead-letters*
 
-   ;; Serialization
+   ;; Addressing
+   #:format-address
+   #:parse-address
+   #:malformed-address
+
+   ;; Serialization — payload (Stage 1)
    #:serializable-data
    #:serializable-data-class
    #:serialize-payload
    #:deserialize-payload
    #:non-serializable-type
-   #:circular-payload))
+   #:circular-payload
+
+   ;; Serialization — envelope (Stage 2)
+   #:make-envelope
+   #:envelope-id
+   #:envelope-from
+   #:envelope-to
+   #:envelope-operation
+   #:envelope-timestamp
+   #:envelope-time-to-live
+   #:envelope-cause
+   #:serialize-envelope
+   #:serialize-message
+   #:deserialize-message
+   #:serialize-message-full
+   #:deserialize-message-full))

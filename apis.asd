@@ -36,6 +36,7 @@
                              (:file "message")
                              (:file "worker")
                              (:file "runtime")
+                             (:file "addressing")
                              (:file "serialization")
                              ))))
 
@@ -51,7 +52,9 @@
                 :serial t
                 :components ((:file "test-framework")
                              (:file "tests")
-                             (:file "serialization-tests")))))
+                             (:file "serialization-tests")
+                             (:file "addressing-tests")
+                             (:file "envelope-tests")))))
 
 ;;; (asdf:load-system :apis)
 ;;; (asdf:load-system :apis/tests)

@@ -258,3 +258,97 @@ SERIALIZE-PAYLOAD."
   (let ((*package* (find-package :apis)))
     (let ((wire-form (read-from-string string)))
       (deserialize-value wire-form))))
+
+;;; ---------------------------------------------------------------------
+;;; Envelope structure
+;;; ---------------------------------------------------------------------
+;;; The envelope is a defstruct with :type list, so its runtime
+;;; representation IS a list — the wire form printed by the serializer
+;;; and recovered by the reader.  Fields carry wire-form values:
+;;; ULID strings, URI strings, keywords, and integers.
+
+(defstruct (envelope (:type list))
+  id from to operation timestamp time-to-live cause)
+
+;;; ---------------------------------------------------------------------
+;;; Envelope serialization
+;;; ---------------------------------------------------------------------
+
+(defun serialize-envelope (message)
+  "Build an envelope list from MESSAGE, converting all fields to wire form.
+IDs become Crockford base32 strings, addresses become URI strings,
+operation remains a keyword, timestamp and TTL remain integers."
+  (make-envelope
+   :id (format-id (message-id message))
+   :from (let ((f (message-from message)))
+           (when f (format-address f)))
+   :to (let ((a (message-to message)))
+         (when a (format-address a)))
+   :operation (message-operation message)
+   :timestamp (message-timestamp message)
+   :time-to-live (message-time-to-live message)
+   :cause (let ((c (message-cause message)))
+            (when c (format-id c)))))
+
+(defun reconstruct-message-from-envelope (envelope data)
+  "Build a message from a deserialized ENVELOPE list and DATA plist.
+Converts wire-form fields back to rich values: ULID strings become
+integers, local URI strings become integer ULIDs, remote URI strings
+are preserved."
+  (message :id (parse-id (envelope-id envelope))
+           :from (let ((f (envelope-from envelope)))
+                   (when f (resolve-deserialized-address f)))
+           :to (let ((a (envelope-to envelope)))
+                 (when a (resolve-deserialized-address a)))
+           :operation (envelope-operation envelope)
+           :data data
+           :timestamp (envelope-timestamp envelope)
+           :time-to-live (envelope-time-to-live envelope)
+           :cause (let ((c (envelope-cause envelope)))
+                    (when c (parse-id c)))))
+
+;;; ---------------------------------------------------------------------
+;;; Message serialization: public API
+;;; ---------------------------------------------------------------------
+
+(defun serialize-message (message)
+  "Serialize MESSAGE into separate envelope and payload strings.
+Returns (values envelope-string payload-string).
+Validates the payload; signals a condition if the data contains
+non-permitted types."
+  (let ((envelope (serialize-envelope message))
+        (payload-string (serialize-payload (message-data message))))
+    (values (let ((*print-readably* t)
+                  (*print-pretty* nil)
+                  (*package* (find-package :apis)))
+              (prin1-to-string envelope))
+            payload-string)))
+
+(defun deserialize-message (envelope-string payload-string)
+  "Reconstruct a message from its serialized envelope and payload strings."
+  (let ((*package* (find-package :apis)))
+    (reconstruct-message-from-envelope
+     (read-from-string envelope-string)
+     (deserialize-payload payload-string))))
+
+(defun serialize-message-full (message)
+  "Serialize MESSAGE into a single string containing both envelope
+and payload.  The result is a printed two-element list:
+  (envelope-form payload-wire-form)
+Validates the payload; signals a condition if the data contains
+non-permitted types."
+  (let* ((envelope (serialize-envelope message))
+         (visited (make-hash-table :test 'eq))
+         (payload-wire (serialize-value (message-data message) visited)))
+    (let ((*print-readably* t)
+          (*print-pretty* nil)
+          (*package* (find-package :apis)))
+      (prin1-to-string (list envelope payload-wire)))))
+
+(defun deserialize-message-full (string)
+  "Reconstruct a message from a string produced by SERIALIZE-MESSAGE-FULL."
+  (let ((*package* (find-package :apis)))
+    (destructuring-bind (envelope payload-wire) (read-from-string string)
+      (reconstruct-message-from-envelope
+       envelope
+       (deserialize-value payload-wire)))))

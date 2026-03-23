@@ -16,10 +16,10 @@
 
 (defclass message ()
   ((id :reader message-id :initform (makeid) :initarg :id :type integer)
-   ;; a ULID identifying the sender, or nil
-   (from :reader message-from :initform nil :initarg :from :type (or integer null))
-   ;; a ULID identifying the recipient
-   (to :reader message-to :initform nil :initarg :to :type (or integer null))
+   ;; address: a ULID (integer, local) or URI string (remote), or nil
+   (from :reader message-from :initform nil :initarg :from :type (or integer string null))
+   ;; address: a ULID (integer, local) or URI string (remote), or nil
+   (to :reader message-to :initform nil :initarg :to :type (or integer string null))
    ;; a keyword naming the operation
    (operation :reader message-operation :initform :ping :initarg :operation :type symbol)
    ;; a plist
@@ -30,12 +30,19 @@
    ;; a ULID identifying the message that caused this one, or nil
    (cause :reader message-cause :initform nil :initarg :cause :type (or integer null))))
 
+(defun print-address (address)
+  "Format an address for human-readable display."
+  (etypecase address
+    (null "nil")
+    (integer (format-id address))
+    (string address)))
+
 (defmethod print-object ((obj message) out-stream)
   (print-unreadable-object (obj out-stream :type nil :identity nil)
     (format out-stream "message ~A from: ~A to: ~A ~S ~S"
             (format-id (message-id obj))
-            (if (message-from obj) (format-id (message-from obj)) "nil")
-            (if (message-to obj) (format-id (message-to obj)) "nil")
+            (print-address (message-from obj))
+            (print-address (message-to obj))
             (message-operation obj)
             (message-data obj))))
 
