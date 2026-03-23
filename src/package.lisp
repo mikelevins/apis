@@ -65,6 +65,11 @@
    #:non-serializable-type
    #:circular-payload
 
+   ;; Runtime — transport registry (Stage 3)
+   #:runtime-local-authority
+   #:register-transport
+   #:find-transport
+
    ;; Serialization — envelope (Stage 2)
    #:make-envelope
    #:envelope-id
@@ -78,4 +83,28 @@
    #:serialize-message
    #:deserialize-message
    #:serialize-message-full
-   #:deserialize-message-full))
+   #:deserialize-message-full
+
+   ;; Transport (Stage 3)
+   #:transport
+   #:transport-authority
+   #:transport-local-authority
+   #:transport-transforms
+   #:transport-send
+   #:transport-receive
+   #:transport-close
+   #:transport-write-bytes
+   #:transport-read-bytes
+   #:transport-error
+   #:transport-error-reason
+   #:make-transform
+   #:transform-name
+   #:transform-apply-fn
+   #:transform-reverse-fn
+   #:apply-transforms
+   #:reverse-transforms
+   #:frame-message
+   #:deframe-message
+   #:loopback-transport
+   #:deliver-remotely
+   #:enrich-from-address))

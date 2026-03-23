@@ -29,7 +29,14 @@
              :initform (make-hash-table :test 'eql))
    (registry-lock :reader runtime-registry-lock
                   :initform (bt:make-lock "registry-lock"))
-   (running-p :accessor runtime-running-p :initform nil :type boolean)))
+   (running-p :accessor runtime-running-p :initform nil :type boolean)
+   ;; Transport registry (Stage 3)
+   (local-authority :accessor runtime-local-authority :initform nil
+                    :initarg :local-authority :type (or string null))
+   (transports :reader runtime-transports
+               :initform (make-hash-table :test 'equal))
+   (transports-lock :reader runtime-transports-lock
+                    :initform (bt:make-lock "transports-lock"))))
 
 (defmethod (setf runtime-thread-count) (new-count (runtime runtime))
   "Set the thread count. Declined with a warning if the runtime is running."
@@ -60,6 +67,22 @@
   "Look up a worker by ULID in the runtime's registry. Thread-safe."
   (bt:with-lock-held ((runtime-registry-lock runtime))
     (gethash id (runtime-registry runtime))))
+
+;;; ---------------------------------------------------------------------
+;;; transport registry
+;;; ---------------------------------------------------------------------
+
+(defun register-transport (authority transport runtime)
+  "Register TRANSPORT as the handler for AUTHORITY (a host or host:port string).
+Thread-safe."
+  (bt:with-lock-held ((runtime-transports-lock runtime))
+    (setf (gethash authority (runtime-transports runtime)) transport)))
+
+(defun find-transport (authority runtime)
+  "Look up a transport by AUTHORITY string.  Thread-safe.
+Returns the transport or NIL."
+  (bt:with-lock-held ((runtime-transports-lock runtime))
+    (gethash authority (runtime-transports runtime))))
 
 ;;; ---------------------------------------------------------------------
 ;;; dead letters
@@ -176,6 +199,10 @@ If the worker is not found, file as a dead letter."
            (queues:qpush (runtime-ready-queue runtime) worker)
            (bt:condition-notify (runtime-ready-condvar runtime))))))))
 
+;;; Forward declaration: deliver-remotely is defined in transport.lisp
+;;; which loads after this file.
+(declaim (ftype function deliver-remotely))
+
 (defgeneric send (message)
   (:documentation "Deliver a message to the worker named by its TO field.
 Dispatches on address type: integer (local ULID), string (URI, local
@@ -198,12 +225,18 @@ dead letter."))
            (string
             (multiple-value-bind (host port worker-id)
                 (parse-address target)
-              (declare (ignore port))
               (if host
-                  ;; Remote address — no transport layer yet
-                  (file-dead-letter
-                   msg (format nil "No transport configured for remote address ~A."
-                               target))
+                  ;; Remote address — look up transport
+                  (let* ((authority (if port
+                                       (format nil "~A:~D" host port)
+                                       host))
+                         (transport (find-transport authority runtime)))
+                    (if transport
+                        (deliver-remotely msg transport runtime)
+                        (file-dead-letter
+                         msg (format nil
+                                     "No transport configured for remote address ~A."
+                                     target))))
                   ;; Local URI — resolve to worker-id and deliver
                   (deliver-locally msg worker-id runtime))))))))))
 

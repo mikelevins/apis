@@ -38,6 +38,7 @@
                              (:file "addressing")
                              (:file "runtime")
                              (:file "serialization")
+                             (:file "transport")
                              ))))
 
 ;;; ---------------------------------------------------------------------
@@ -54,7 +55,8 @@
                              (:file "tests")
                              (:file "serialization-tests")
                              (:file "addressing-tests")
-                             (:file "envelope-tests")))))
+                             (:file "envelope-tests")
+                             (:file "transport-tests")))))
 
 ;;; (asdf:load-system :apis)
 ;;; (asdf:load-system :apis/tests)
