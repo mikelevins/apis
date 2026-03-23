@@ -4,7 +4,7 @@
 ;;;; Project:       the apis message-passing system
 ;;;; Purpose:       package definitions
 ;;;; Author:        mikel evins
-;;;; Copyright:     2014-2025 by mikel evins
+;;;; Copyright:     2014-2026 by mikel evins
 ;;;;
 ;;;; ***********************************************************************
 
@@ -50,4 +50,12 @@
    #:*default-runtime-thread-count*
 
    ;; Dead letters
-   #:*dead-letters*))
+   #:*dead-letters*
+
+   ;; Serialization
+   #:serializable-data
+   #:serializable-data-class
+   #:serialize-payload
+   #:deserialize-payload
+   #:non-serializable-type
+   #:circular-payload))

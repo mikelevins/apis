@@ -25,6 +25,7 @@
   :version (:read-file-form "version.lisp")
   :depends-on (
                :bordeaux-threads ; [MIT] https://github.com/sionescu/bordeaux-threads
+               :closer-mop       ; [MIT] https://github.com/pcostanza/closer-mop
                :queues.simple-cqueue ; [MIT] https://github.com/oconnore/queues 
                )
   :components ((:module "src"
@@ -35,6 +36,7 @@
                              (:file "message")
                              (:file "worker")
                              (:file "runtime")
+                             (:file "serialization")
                              ))))
 
 ;;; ---------------------------------------------------------------------
@@ -48,7 +50,8 @@
   :components ((:module "tests"
                 :serial t
                 :components ((:file "test-framework")
-                             (:file "tests")))))
+                             (:file "tests")
+                             (:file "serialization-tests")))))
 
 ;;; (asdf:load-system :apis)
 ;;; (asdf:load-system :apis/tests)

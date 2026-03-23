@@ -23,18 +23,31 @@
 ;;; ---------------------------------------------------------------------
 ;;; Millisecond timestamps
 ;;; ---------------------------------------------------------------------
+;;; Millisecond precision is achieved by anchoring to GET-UNIVERSAL-TIME
+;;; once at load time, then deriving all subsequent timestamps from
+;;; GET-INTERNAL-REAL-TIME alone. This avoids non-monotonic results
+;;; caused by combining two unsynchronized clock sources.
 
 (defconstant +unix-epoch-in-universal-time+ 2208988800
   "The Unix epoch (1970-01-01T00:00:00Z) as a Common Lisp universal time.")
 
+(defvar *time-anchor-internal* (get-internal-real-time)
+  "The value of GET-INTERNAL-REAL-TIME at load time, used as the
+reference point for elapsed-time computation.")
+
+(defvar *time-anchor-unix-ms*
+  (* (- (get-universal-time) +unix-epoch-in-universal-time+) 1000)
+  "Unix epoch milliseconds at load time, computed once from
+GET-UNIVERSAL-TIME. All subsequent timestamps are derived by adding
+elapsed milliseconds from the internal clock to this anchor.")
+
 (defun current-time-in-milliseconds ()
   "Return the current time as milliseconds since the Unix epoch.
-Seconds from GET-UNIVERSAL-TIME; sub-second fraction from GET-INTERNAL-REAL-TIME."
-  (let* ((unix-seconds (- (get-universal-time) +unix-epoch-in-universal-time+))
-         (internal-now (get-internal-real-time))
-         (fractional-ms (floor (* (mod internal-now internal-time-units-per-second) 1000)
-                               internal-time-units-per-second)))
-    (+ (* unix-seconds 1000) fractional-ms)))
+Monotonic: derived from a single clock source (GET-INTERNAL-REAL-TIME)
+anchored to a one-time calibration against GET-UNIVERSAL-TIME."
+  (let ((elapsed-ms (floor (* (- (get-internal-real-time) *time-anchor-internal*) 1000)
+                           internal-time-units-per-second)))
+    (+ *time-anchor-unix-ms* elapsed-ms)))
 
 ;;; ---------------------------------------------------------------------
 ;;; ULID generation and formatting

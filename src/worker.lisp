@@ -4,7 +4,7 @@
 ;;;; Project:       the apis message-passing system
 ;;;; Purpose:       worker implementation
 ;;;; Author:        mikel evins
-;;;; Copyright:     2015-2025 by mikel evins
+;;;; Copyright:     2015-2026 by mikel evins
 ;;;;
 ;;;; ***********************************************************************
 
