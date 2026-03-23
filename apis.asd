@@ -4,7 +4,7 @@
 ;;;; Project:       the apis message-passing system
 ;;;; Purpose:       system definition
 ;;;; Author:        mikel evins
-;;;; Copyright:     2024 by mikel evins
+;;;; Copyright:     2024-2025 by mikel evins
 ;;;;
 ;;;; ***********************************************************************
 
@@ -19,7 +19,7 @@
 
 (asdf:defsystem #:apis
   :serial t
-  :description "Apis: swarms of threads and processes passing messages"
+  :description "Apis: actors passing messages"
   :author "mikel evins <mevins@me.com>"
   :license "Apache 2.0"
   :version (:read-file-form "version.lisp")
@@ -34,7 +34,7 @@
                              (:file "id")
                              (:file "message")
                              (:file "worker")
-                             (:file "service-worker")
+                             (:file "runtime")
                              ))))
 
 ;;; (asdf:load-system :apis)
