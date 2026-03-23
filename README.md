@@ -23,4 +23,4 @@ In this model, loading Apis creates a runtime instance bound to
 worker messages. Each worker has a queue of pending messages that are
 executed by the runtime's threads in next-available order. You can
 adjust the number of threads used by the runtime by calling `(setf
-(runtime-thread-count *default-runtime*))`.
+(runtime-thread-count *default-runtime*))` when the runtime is stopped..
