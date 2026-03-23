@@ -43,6 +43,7 @@
    #:start-runtime
    #:stop-runtime
    #:runtime-running-p
+   #:clear-all-queues
    #:*default-runtime*
 
    ;; Dead letters

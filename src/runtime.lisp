@@ -16,7 +16,7 @@
 
 (defclass runtime ()
   ((threads :accessor runtime-threads :initform nil)
-   (thread-count :accessor runtime-thread-count
+   (thread-count :reader runtime-thread-count
                  :initform *default-runtime-thread-count*
                  :initarg :thread-count :type integer)
    (ready-queue :accessor runtime-ready-queue
@@ -30,6 +30,13 @@
    (registry-lock :reader runtime-registry-lock
                   :initform (bt:make-lock "registry-lock"))
    (running-p :accessor runtime-running-p :initform nil :type boolean)))
+
+(defmethod (setf runtime-thread-count) (new-count (runtime runtime))
+  "Set the thread count. Declined with a warning if the runtime is running."
+  (cond ((runtime-running-p runtime)
+         (warn "Cannot change thread count while the runtime is running.")
+         (runtime-thread-count runtime))
+        (t (setf (slot-value runtime 'thread-count) new-count))))
 
 (defmethod print-object ((rt runtime) out-stream)
   (print-unreadable-object (rt out-stream :type t :identity nil)
@@ -120,15 +127,31 @@ Workers and their queued messages are preserved."
     (setf (runtime-running-p runtime) nil)
     ;; wake all threads so they see running-p is false
     (bt:with-lock-held ((runtime-ready-lock runtime))
-      (bt:condition-notify (runtime-ready-condvar runtime))
-      (bt:condition-notify (runtime-ready-condvar runtime))
-      (bt:condition-notify (runtime-ready-condvar runtime))
-      (bt:condition-notify (runtime-ready-condvar runtime)))
+      (dotimes (i (runtime-thread-count runtime))
+        (bt:condition-notify (runtime-ready-condvar runtime))))
     ;; join all threads
     (dolist (thread (runtime-threads runtime))
       (when (bt:threadp thread)
         (bt:join-thread thread)))
     (setf (runtime-threads runtime) nil))
+  runtime)
+
+(defun clear-all-queues (runtime)
+  "Drain all worker message queues and the ready-queue, resetting every
+worker to :idle. Declined with a warning if the runtime is running."
+  (when (runtime-running-p runtime)
+    (warn "Cannot clear queues while the runtime is running.")
+    (return-from clear-all-queues nil))
+  ;; drain each worker's message queue and reset state
+  (maphash (lambda (id worker)
+             (declare (ignore id))
+             (loop while (plusp (queues:qsize (worker-message-queue worker)))
+                   do (queues:qpop (worker-message-queue worker)))
+             (setf (worker-state worker) :idle))
+           (runtime-registry runtime))
+  ;; drain the ready-queue
+  (loop while (plusp (queues:qsize (runtime-ready-queue runtime)))
+        do (queues:qpop (runtime-ready-queue runtime)))
   runtime)
 
 ;;; ---------------------------------------------------------------------
