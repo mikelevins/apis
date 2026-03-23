@@ -37,6 +37,27 @@
                              (:file "runtime")
                              ))))
 
+;;; ---------------------------------------------------------------------
+;;; apis test system
+;;; ---------------------------------------------------------------------
+
+(asdf:defsystem #:apis/tests
+  :serial t
+  :description "Apis test suite"
+  :depends-on (#:apis)
+  :components ((:module "tests"
+                :serial t
+                :components ((:file "test-framework")
+                             (:file "tests")))))
+
+;;; (asdf:load-system :apis)
+;;; (asdf:load-system :apis/tests)
+;;; (apis-tests:run-tests)
+
+;;; ---------------------------------------------------------------------
+;;; load and test
+;;; ---------------------------------------------------------------------
+
 #+repl (asdf:load-system :apis)
 
 #+repl apis:*default-runtime*

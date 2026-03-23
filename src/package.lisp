@@ -13,7 +13,9 @@
   (:export
 
    ;; IDs
+   #:format-id
    #:makeid
+   #:parse-id
 
    ;; Messages
    #:message
@@ -45,6 +47,7 @@
    #:runtime-running-p
    #:clear-all-queues
    #:*default-runtime*
+   #:*default-runtime-thread-count*
 
    ;; Dead letters
    #:*dead-letters*))
