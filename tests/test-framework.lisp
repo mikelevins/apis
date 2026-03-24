@@ -16,6 +16,7 @@
            #:check-equal
            #:check-condition
            ;; Cross-host TCP test helpers (Stage 5)
+           #:test-tcp-connectivity
            #:setup-test-receiver
            #:teardown-test-receiver
            #:send-test-message-tcp

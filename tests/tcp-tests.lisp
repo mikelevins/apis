@@ -588,33 +588,71 @@ Returns the message plist or NIL on timeout."
            (check t "double close should not error"))
       (handler-case (usocket:socket-close server-socket) (error () nil)))))
 
+
 ;;; =====================================================================
 ;;; Cross-host test helpers
 ;;; =====================================================================
 ;;; These functions are not tests themselves. They provide a simple
 ;;; setup for running tests between two different machines.
 ;;;
-;;; On machine A (the receiver):
+;;; Step 0 — verify connectivity:
+;;;   ;; On either machine:
+;;;   (apis-tests:test-tcp-connectivity "other-host" 9100)
+;;;
+;;; Step 1 — start the receiver:
+;;;   ;; On machine A:
 ;;;   (apis-tests:setup-test-receiver :port 9100)
-;;;   ;; → (values listener worker runtime)
-;;;   ;; Worker ID is printed to stdout.
+;;;   ;; → prints Worker ULID
 ;;;
-;;; On machine B (the sender):
-;;;   (apis-tests:send-test-message-tcp "machine-a.local" 9100
+;;; Step 2 — send from the other machine:
+;;;   ;; On machine B:
+;;;   (apis-tests:send-test-message-tcp "machine-a-ip" 9100
 ;;;     "WORKER-ULID-STRING" '(:greeting "hello from B"))
-;;;   ;; Connects, sends one message, closes.
 ;;;
-;;; On machine A, check:
-;;;   (queues:qpop (tcp-test-received *cross-host-worker*))
+;;; Step 3 — check on machine A:
+;;;   (queues:qpop (apis-tests::tcp-test-received
+;;;                  apis-tests:*cross-host-worker*))
 
 (defvar *cross-host-worker* nil
   "The test worker created by SETUP-TEST-RECEIVER, for inspection.")
+
+(defun test-tcp-connectivity (host port &key (timeout 5))
+  "Test basic TCP connectivity to HOST:PORT.  Attempts to connect,
+reports success or failure with details.  Does not require a listener
+running Apis — any TCP listener on that port will do.  Returns T on
+success, NIL on failure."
+  (format t "~&Testing TCP connection to ~A:~D ...~%" host port)
+  (handler-case
+      (let ((socket (usocket:socket-connect
+                     host port
+                     :element-type '(unsigned-byte 8)
+                     :timeout timeout)))
+        (usocket:socket-close socket)
+        (format t "  SUCCESS: Connected and closed cleanly.~%")
+        t)
+    (usocket:connection-refused-error ()
+      (format t "  FAILED: Connection refused. Is anything listening on port ~D?~%" port)
+      nil)
+    (usocket:timeout-error ()
+      (format t "  FAILED: Connection timed out after ~D seconds.~%~
+  Likely causes: firewall blocking port ~D, or host ~A unreachable.~%"
+              timeout port host)
+      nil)
+    (usocket:host-unreachable-error ()
+      (format t "  FAILED: Host ~A is unreachable.~%" host)
+      nil)
+    (usocket:socket-error (e)
+      (format t "  FAILED: Socket error: ~A~%" e)
+      nil)
+    (error (e)
+      (format t "  FAILED: ~A~%" e)
+      nil)))
 
 (defun setup-test-receiver (&key (port 9100) (host "0.0.0.0")
                               transforms)
   "Start a runtime, create a tcp-test-worker, and start a listener.
 Prints the worker's ULID so the sender can address it.
-Returns (values listener worker runtime).
+Returns (values listener worker runtime old-default-runtime).
 Call TEARDOWN-TEST-RECEIVER to clean up."
   (let* ((rt (apis:make-runtime :thread-count 4))
          (old-default apis:*default-runtime*))
@@ -630,7 +668,14 @@ Call TEARDOWN-TEST-RECEIVER to clean up."
         (apis:start-tcp-listener listener)
         (format t "~&Receiver ready on ~A:~D~%" host port)
         (format t "Worker ULID: ~A~%" (apis:format-id (apis:worker-id worker)))
-        (format t "Previous *default-runtime* saved; call TEARDOWN-TEST-RECEIVER to restore.~%")
+        (format t "~%To verify connectivity from the sender, run:~%")
+        (format t "  (apis-tests:test-tcp-connectivity ~S ~D)~%" "<receiver-ip>" port)
+        (format t "~%To send a test message:~%")
+        (format t "  (apis-tests:send-test-message-tcp ~S ~D ~S~%    '(:greeting ~S))~%"
+                "<receiver-ip>" port
+                (apis:format-id (apis:worker-id worker))
+                "hello")
+        (format t "~%Call (apis-tests:teardown-test-receiver ...) to stop.~%")
         (values listener worker rt old-default)))))
 
 (defun teardown-test-receiver (listener runtime
@@ -650,18 +695,39 @@ Call TEARDOWN-TEST-RECEIVER to clean up."
   "Connect to HOST:PORT, send a single test message to the worker
 identified by WORKER-ID-STRING, and close the connection.
 DATA is the message payload plist.  TRANSFORMS must match the
-receiver's configuration."
-  (let ((tr (apis:connect-tcp host port
-                              :transforms transforms
-                              :local-authority local-authority)))
-    (unwind-protect
-         (let* ((to-addr (format nil "apis://~A:~D/~A" host port worker-id-string))
-                (msg (apis:message :to to-addr
-                                   :operation operation
-                                   :data data))
-                (enriched (apis::enrich-from-address msg local-authority)))
-           (multiple-value-bind (env-str pay-str)
-               (apis:serialize-message enriched)
-             (apis:transport-send tr env-str pay-str :operation operation))
-           (format t "~&Sent ~S to ~A~%" operation to-addr))
-      (apis:transport-close tr))))
+receiver's configuration.  Reports errors clearly."
+  (format t "~&Connecting to ~A:~D ...~%" host port)
+  (let ((tr nil))
+    (handler-case
+        (progn
+          (setf tr (apis:connect-tcp host port
+                                     :transforms transforms
+                                     :local-authority local-authority))
+          (format t "Connected.  Sending ~S ...~%" operation)
+          (let* ((to-addr (format nil "apis://~A:~D/~A" host port worker-id-string))
+                 (msg (apis:message :to to-addr
+                                    :operation operation
+                                    :data data))
+                 (enriched (apis::enrich-from-address msg local-authority)))
+            (multiple-value-bind (env-str pay-str)
+                (apis:serialize-message enriched)
+              (apis:transport-send tr env-str pay-str :operation operation))
+            (format t "Sent ~S to ~A~%" operation to-addr)
+            ;; Brief pause to let the data flush before closing
+            (sleep 0.1)
+            (apis:transport-close tr)
+            (setf tr nil)
+            (format t "Connection closed.  Check the receiver.~%")
+            t))
+      (usocket:connection-refused-error ()
+        (format t "FAILED: Connection refused. Is the listener running on ~A:~D?~%"
+                host port)
+        nil)
+      (usocket:timeout-error ()
+        (format t "FAILED: Connection timed out. Firewall or host unreachable?~%")
+        nil)
+      (error (e)
+        (format t "FAILED: ~A~%" e)
+        (when tr
+          (handler-case (apis:transport-close tr) (error () nil)))
+        nil))))
