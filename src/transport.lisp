@@ -19,6 +19,12 @@
   (:report (lambda (c s)
              (format s "Transport error: ~A" (transport-error-reason c)))))
 
+(define-condition signature-verification-failed (transport-error)
+  ()
+  (:report (lambda (c s)
+             (format s "Signature verification failed: ~A"
+                     (transport-error-reason c)))))
+
 ;;; ---------------------------------------------------------------------
 ;;; String ↔ octet conversion
 ;;; ---------------------------------------------------------------------
@@ -51,9 +57,9 @@
 ;;; operate on octet vectors.  Transforms compose: the output of one
 ;;; is the input of the next.
 ;;;
-;;; Stage 3 uses a flat list of transforms per transport.  Stage 4
-;;; will upgrade this to a function (envelope → transform-list) for
-;;; per-operation transform policies.
+;;; The transforms slot on a transport may be a flat list of transforms
+;;; (applied to every message) or a function (operation-keyword →
+;;; transform-list) for per-operation policies.  See RESOLVE-TRANSFORMS.
 
 (defstruct (transform (:type list))
   "A named, reversible byte-to-byte transform."
@@ -76,6 +82,149 @@ Each transform's reverse-fn is called on the output of the previous one."
             (funcall (transform-reverse-fn xform) b))
           (reverse transforms)
           :initial-value bytes))
+
+;;; ---------------------------------------------------------------------
+;;; Per-operation transform resolution
+;;; ---------------------------------------------------------------------
+;;; The transforms slot on a transport may be a flat list (every
+;;; message gets the same transforms) or a function (operation-keyword
+;;; → transform-list) for per-operation policies.
+
+(defun resolve-transforms (transport operation)
+  "Return the transform list for TRANSPORT given OPERATION.
+If the transport's transforms slot is a list, return it directly.
+If it is a function, call it with OPERATION to get the per-message
+transform list."
+  (let ((transforms (transport-transforms transport)))
+    (etypecase transforms
+      (list transforms)
+      (function (funcall transforms operation)))))
+
+;;; ---------------------------------------------------------------------
+;;; Encryption transform (AES-256-CTR)
+;;; ---------------------------------------------------------------------
+;;; The apply-fn generates a fresh random 16-byte IV, encrypts with
+;;; AES-256 in CTR mode, and prepends the IV to the ciphertext.
+;;; The reverse-fn extracts the IV prefix and decrypts.
+;;;
+;;; KEY must be a 32-byte octet vector for AES-256.
+
+(defun make-encryption-transform (key &key (cipher :aes) (mode :ctr))
+  "Return a transform that encrypts on apply and decrypts on reverse.
+KEY is an octet vector of appropriate length for CIPHER (32 bytes for
+AES-256).  Each encryption uses a fresh random IV, prepended to the
+ciphertext so the receiver can extract it."
+  (let ((iv-length (ironclad:block-length cipher)))
+    (make-transform
+     :name :encrypt
+     :apply-fn
+     (lambda (plaintext)
+       (let* ((iv (ironclad:random-data iv-length))
+              (c (ironclad:make-cipher cipher :mode mode
+                                              :key key
+                                              :initialization-vector iv))
+              (ciphertext (make-array (length plaintext)
+                                     :element-type '(unsigned-byte 8))))
+         (ironclad:encrypt c plaintext ciphertext)
+         ;; Prepend IV to ciphertext
+         (let ((result (make-array (+ iv-length (length ciphertext))
+                                   :element-type '(unsigned-byte 8))))
+           (replace result iv)
+           (replace result ciphertext :start1 iv-length)
+           result)))
+     :reverse-fn
+     (lambda (ciphertext-with-iv)
+       (handler-case
+           (let* ((iv (subseq ciphertext-with-iv 0 iv-length))
+                  (ciphertext (subseq ciphertext-with-iv iv-length))
+                  (c (ironclad:make-cipher cipher :mode mode
+                                                  :key key
+                                                  :initialization-vector iv))
+                  (plaintext (make-array (length ciphertext)
+                                        :element-type '(unsigned-byte 8))))
+             (ironclad:decrypt c ciphertext plaintext)
+             plaintext)
+         (error (e)
+           (error 'transport-error
+                  :reason (format nil "Decryption failed: ~A" e))))))))
+
+;;; ---------------------------------------------------------------------
+;;; Signing transform (HMAC)
+;;; ---------------------------------------------------------------------
+;;; The apply-fn computes HMAC(key, bytes) and appends the digest.
+;;; The reverse-fn splits off the trailing digest, recomputes, and
+;;; verifies with constant-time comparison.
+;;;
+;;; Composition convention: when using both signing and encryption,
+;;; place the signing transform BEFORE the encryption transform in
+;;; the transform list.  This means apply does sign-then-encrypt
+;;; (the signature covers the plaintext), and reverse does
+;;; decrypt-then-verify (reverse order).  This is the standard
+;;; authenticated encryption pattern: the signature is protected by
+;;; encryption, and verification operates on the original plaintext.
+
+(defun constant-time-equal (a b)
+  "Compare octet vectors A and B in constant time.
+Returns T if they are the same length and contain identical bytes.
+The comparison examines every byte regardless of mismatches, preventing
+timing side-channels."
+  (if (/= (length a) (length b))
+      nil
+      (zerop (reduce #'logior
+                     (map '(vector (unsigned-byte 8))
+                          #'logxor a b)
+                     :initial-value 0))))
+
+(defun make-signing-transform (key &key (digest :sha256))
+  "Return a transform that appends an HMAC signature on apply and
+verifies-then-strips on reverse.  KEY is an octet vector.
+Signals SIGNATURE-VERIFICATION-FAILED if verification fails."
+  (let ((digest-length (ironclad:digest-length digest)))
+    (make-transform
+     :name :sign
+     :apply-fn
+     (lambda (bytes)
+       (let* ((hmac (ironclad:make-hmac key digest))
+              (_ (ironclad:update-hmac hmac bytes))
+              (sig (ironclad:hmac-digest hmac))
+              (result (make-array (+ (length bytes) digest-length)
+                                  :element-type '(unsigned-byte 8))))
+         (declare (ignore _))
+         (replace result bytes)
+         (replace result sig :start1 (length bytes))
+         result))
+     :reverse-fn
+     (lambda (bytes-with-sig)
+       (when (< (length bytes-with-sig) digest-length)
+         (error 'signature-verification-failed
+                :reason "Message too short to contain a signature"))
+       (let* ((split (- (length bytes-with-sig) digest-length))
+              (payload (subseq bytes-with-sig 0 split))
+              (received-sig (subseq bytes-with-sig split))
+              (hmac (ironclad:make-hmac key digest))
+              (_ (ironclad:update-hmac hmac payload))
+              (expected-sig (ironclad:hmac-digest hmac)))
+         (declare (ignore _))
+         (unless (constant-time-equal received-sig expected-sig)
+           (error 'signature-verification-failed
+                  :reason "HMAC digest mismatch"))
+         payload)))))
+
+;;; ---------------------------------------------------------------------
+;;; Envelope operation extraction
+;;; ---------------------------------------------------------------------
+;;; For per-operation transform policies, the receive side needs the
+;;; operation keyword from the cleartext envelope string before
+;;; reversing transforms.  The envelope is a small s-expression list;
+;;; we parse it with READ-FROM-STRING and use the envelope accessor.
+
+(defun extract-envelope-operation (envelope-string)
+  "Extract the operation keyword from a serialized envelope string.
+Returns the operation keyword, or NIL if extraction fails."
+  (handler-case
+      (let ((*package* (find-package :apis)))
+        (envelope-operation (read-from-string envelope-string)))
+    (error () nil)))
 
 ;;; ---------------------------------------------------------------------
 ;;; Framing protocol
@@ -152,7 +301,9 @@ Returns (values envelope-octets payload-octets)."
               :documentation "Remote host or host:port this transport connects to.")
    (transforms :accessor transport-transforms :initarg :transforms
                :initform nil
-               :documentation "Flat list of transform structs, applied in order on send.")
+               :documentation "Transform policy: either a flat list of transform structs
+(applied to every message) or a function (operation-keyword → transform-list)
+for per-operation policies.  See RESOLVE-TRANSFORMS.")
    (local-authority :reader transport-local-authority :initarg :local-authority
                     :type (or string null)
                     :documentation "This runtime's host:port, for populating FROM addresses.")))
@@ -180,10 +331,12 @@ Subclasses must implement this method.  Returns an octet vector."))
 (defgeneric transport-close (transport)
   (:documentation "Release the transport's resources (connections, etc.)."))
 
-(defgeneric transport-send (transport envelope-string payload-string)
+(defgeneric transport-send (transport envelope-string payload-string
+                            &key operation)
   (:documentation "Transform the payload, frame both parts, and send.
-The base class method handles the pipeline; subclasses provide I/O
-via transport-write-bytes."))
+OPERATION is the message operation keyword, used by per-operation
+transform policies.  The base class method handles the pipeline;
+subclasses provide I/O via transport-write-bytes."))
 
 (defgeneric transport-receive (transport)
   (:documentation "Receive framed bytes, deframe, and reverse-transform.
@@ -192,23 +345,27 @@ handles the pipeline; subclasses provide I/O via transport-read-bytes."))
 
 ;;; --- base class methods ---
 
-(defmethod transport-send ((tr transport) envelope-string payload-string)
-  "Pipeline: string→octets, transform payload, frame, write."
+(defmethod transport-send ((tr transport) envelope-string payload-string
+                           &key operation)
+  "Pipeline: string→octets, resolve transforms, transform payload, frame, write."
   (let* ((envelope-octets (string-to-octets envelope-string))
          (payload-octets  (string-to-octets payload-string))
-         (transformed-payload (apply-transforms (transport-transforms tr)
-                                                payload-octets))
+         (transforms (resolve-transforms tr operation))
+         (transformed-payload (apply-transforms transforms payload-octets))
          (framed (frame-message envelope-octets transformed-payload)))
     (transport-write-bytes tr framed)))
 
 (defmethod transport-receive ((tr transport))
-  "Pipeline: read, deframe, reverse-transform payload, octets→string."
+  "Pipeline: read, deframe, extract operation, resolve + reverse-transform
+payload, octets→string."
   (let ((framed (transport-read-bytes tr)))
     (multiple-value-bind (envelope-octets payload-octets)
         (deframe-message framed)
-      (let ((restored-payload (reverse-transforms (transport-transforms tr)
-                                                  payload-octets)))
-        (values (octets-to-string envelope-octets)
+      (let* ((envelope-string (octets-to-string envelope-octets))
+             (operation (extract-envelope-operation envelope-string))
+             (transforms (resolve-transforms tr operation))
+             (restored-payload (reverse-transforms transforms payload-octets)))
+        (values envelope-string
                 (octets-to-string restored-payload))))))
 
 (defmethod transport-close ((tr transport))
@@ -253,7 +410,8 @@ This is the remote counterpart to deliver-locally."
          (enriched (enrich-from-address msg local-auth)))
     (multiple-value-bind (envelope-string payload-string)
         (serialize-message enriched)
-      (transport-send transport envelope-string payload-string))))
+      (transport-send transport envelope-string payload-string
+                      :operation (message-operation enriched)))))
 
 ;;; ---------------------------------------------------------------------
 ;;; CLASS loopback-transport

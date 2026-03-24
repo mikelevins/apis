@@ -103,8 +103,28 @@
    #:transform-reverse-fn
    #:apply-transforms
    #:reverse-transforms
+   #:resolve-transforms
    #:frame-message
    #:deframe-message
    #:loopback-transport
    #:deliver-remotely
-   #:enrich-from-address))
+   #:enrich-from-address
+
+   ;; Encryption transforms (Stage 4)
+   #:make-encryption-transform
+   #:make-signing-transform
+   #:signature-verification-failed
+
+   ;; TCP transport (Stage 5)
+   #:tcp-transport
+   #:tcp-transport-socket
+   #:tcp-transport-stream
+   #:connect-tcp
+   #:tcp-listener
+   #:listener-host
+   #:listener-port
+   #:listener-transforms
+   #:listener-runtime
+   #:listener-running-p
+   #:start-tcp-listener
+   #:stop-tcp-listener))

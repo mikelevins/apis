@@ -26,7 +26,9 @@
   :depends-on (
                :bordeaux-threads ; [MIT] https://github.com/sionescu/bordeaux-threads
                :closer-mop       ; [MIT] https://github.com/pcostanza/closer-mop
-               :queues.simple-cqueue ; [MIT] https://github.com/oconnore/queues 
+               :ironclad          ; [MIT] https://github.com/sharplispers/ironclad
+               :queues.simple-cqueue ; [MIT] https://github.com/oconnore/queues
+               :usocket           ; [MIT] https://github.com/usocket/usocket
                )
   :components ((:module "src"
                 :serial t
@@ -39,6 +41,7 @@
                              (:file "runtime")
                              (:file "serialization")
                              (:file "transport")
+                             (:file "tcp-transport")
                              ))))
 
 ;;; ---------------------------------------------------------------------
@@ -56,7 +59,9 @@
                              (:file "serialization-tests")
                              (:file "addressing-tests")
                              (:file "envelope-tests")
-                             (:file "transport-tests")))))
+                             (:file "transport-tests")
+                             (:file "encryption-tests")
+                             (:file "tcp-tests")))))
 
 ;;; (asdf:load-system :apis)
 ;;; (asdf:load-system :apis/tests)

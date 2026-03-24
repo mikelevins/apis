@@ -14,7 +14,12 @@
            #:define-test
            #:check
            #:check-equal
-           #:check-condition))
+           #:check-condition
+           ;; Cross-host TCP test helpers (Stage 5)
+           #:setup-test-receiver
+           #:teardown-test-receiver
+           #:send-test-message-tcp
+           #:*cross-host-worker*))
 
 (in-package #:apis-tests)
 
