@@ -127,4 +127,14 @@
    #:listener-runtime
    #:listener-running-p
    #:start-tcp-listener
-   #:stop-tcp-listener))
+   #:stop-tcp-listener
+
+   ;; Runtime-worker (Stage 6)
+   #:runtime-worker
+   #:runtime-worker-owning-runtime
+   #:install-runtime-worker
+   #:swap-runtime-worker
+   #:register-pending-reply
+   #:pending-reply-count
+   #:request
+   #:apis-version))

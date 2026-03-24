@@ -30,6 +30,12 @@
    (registry-lock :reader runtime-registry-lock
                   :initform (bt:make-lock "registry-lock"))
    (running-p :accessor runtime-running-p :initform nil :type boolean)
+   ;; Runtime-worker (Stage 6): a pet worker that handles
+   ;; meta-protocol operations and tracks pending request callbacks.
+   ;; Populated by install-runtime-worker (defined in runtime-worker.lisp).
+   (runtime-worker-instance :accessor runtime-worker :initform nil
+                            :documentation "The runtime-worker for this runtime,
+or NIL if not yet installed.")
    ;; Transport registry (Stage 3)
    (local-authority :accessor runtime-local-authority :initform nil
                     :initarg :local-authority :type (or string null))

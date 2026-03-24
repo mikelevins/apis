@@ -42,6 +42,7 @@
                              (:file "serialization")
                              (:file "transport")
                              (:file "tcp-transport")
+                             (:file "runtime-worker")
                              ))))
 
 ;;; ---------------------------------------------------------------------
@@ -61,10 +62,11 @@
                              (:file "envelope-tests")
                              (:file "transport-tests")
                              (:file "encryption-tests")
-                             (:file "tcp-tests")))))
+                             (:file "tcp-tests")
+                             (:file "runtime-worker-tests")))))
 
 ;;; (asdf:load-system :apis)
-;;; (asdf:load-system :apis/tests)
+;;; (asdf:load-system :apis/tests :force t)
 ;;; (apis-tests:run-tests)
 
 ;;; ---------------------------------------------------------------------

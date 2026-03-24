@@ -404,10 +404,24 @@ returns MSG unchanged."
 
 (defun deliver-remotely (msg transport runtime)
   "Enrich FROM, serialize, and send MSG via TRANSPORT.
+If FROM is nil and the runtime has a runtime-worker, substitutes the
+runtime-worker's ID so that the remote end has a replyable address.
 This is the remote counterpart to deliver-locally."
-  (declare (ignore runtime))
   (let* ((local-auth (transport-local-authority transport))
-         (enriched (enrich-from-address msg local-auth)))
+         ;; Fill in nil FROM with runtime-worker's ID when available
+         (rw (runtime-worker runtime))
+         (msg-with-from
+           (if (and (null (message-from msg)) rw)
+               (message :id (message-id msg)
+                        :from (worker-id rw)
+                        :to (message-to msg)
+                        :operation (message-operation msg)
+                        :data (message-data msg)
+                        :timestamp (message-timestamp msg)
+                        :time-to-live (message-time-to-live msg)
+                        :cause (message-cause msg))
+               msg))
+         (enriched (enrich-from-address msg-with-from local-auth)))
     (multiple-value-bind (envelope-string payload-string)
         (serialize-message enriched)
       (transport-send transport envelope-string payload-string
