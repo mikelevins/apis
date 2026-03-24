@@ -133,21 +133,24 @@ runtime-worker whose CAUSE field matches MESSAGE's ID.
 If MESSAGE has a nil FROM field, it is set to the runtime-worker's
 ID so that replies are routed back to the runtime-worker.
 
-Returns the message ID (which will appear as CAUSE in the reply)."
-  (let* ((rw (runtime-worker runtime))
-         (msg (if (null (message-from message))
-                  (message :id (message-id message)
-                           :from (worker-id rw)
-                           :to (message-to message)
-                           :operation (message-operation message)
-                           :data (message-data message)
-                           :timestamp (message-timestamp message)
-                           :time-to-live (message-time-to-live message)
-                           :cause (message-cause message))
-                  message)))
-    (register-pending-reply rw (message-id msg) callback)
-    (send msg)
-    (message-id msg)))
+Returns the message ID (which will appear as CAUSE in the reply).
+Signals an error if the runtime has no runtime-worker."
+  (let ((rw (runtime-worker runtime)))
+    (unless rw
+      (error "Cannot send request: runtime ~S has no runtime-worker." runtime))
+    (let ((msg (if (null (message-from message))
+                   (message :id (message-id message)
+                            :from (worker-id rw)
+                            :to (message-to message)
+                            :operation (message-operation message)
+                            :data (message-data message)
+                            :timestamp (message-timestamp message)
+                            :time-to-live (message-time-to-live message)
+                            :cause (message-cause message))
+                   message)))
+      (register-pending-reply rw (message-id msg) callback)
+      (send msg)
+      (message-id msg))))
 
 ;;; ---------------------------------------------------------------------
 ;;; install-runtime-worker
@@ -196,16 +199,41 @@ NEW-WORKER."
   new-worker)
 
 ;;; ---------------------------------------------------------------------
-;;; Auto-install on runtime creation
+;;; Load-time guard: install runtime-worker on *default-runtime*
 ;;; ---------------------------------------------------------------------
-;;; Rather than an :after method on initialize-instance (which fires
-;;; during make-instance and causes the runtime-worker to register in
-;;; the wrong *default-runtime*), installation is done explicitly by
-;;; make-runtime via (fboundp 'install-runtime-worker).  See
-;;; runtime.lisp.
+;;; INVARIANT: runtime-worker.lisp loads after runtime.lisp.
 ;;;
-;;; The pre-existing *default-runtime* (created before this file loads)
-;;; is handled by the load-time form below.
+;;; Three cases at load time:
+;;;
+;;; 1. *default-runtime* is NIL.
+;;;    This means runtime-worker.lisp loaded before runtime.lisp,
+;;;    which violates the load ordering declared in apis.asd.  We
+;;;    warn so the developer knows the ordering contract is broken.
+;;;    Even though the fboundp guard in make-runtime may accidentally
+;;;    recover later, silent self-healing hides a real dependency
+;;;    violation.  A future change could break the recovery without
+;;;    anyone knowing the ordering was wrong in the first place.
+;;;
+;;; 2. *default-runtime* exists but has no runtime-worker.
+;;;    This is the intended case on first load.  The *default-runtime*
+;;;    was created by the load-time form at the bottom of runtime.lisp,
+;;;    before this file loaded, so install-runtime-worker was not yet
+;;;    fboundp.  We install one now.
+;;;
+;;; 3. *default-runtime* already has a runtime-worker.
+;;;    Normal reload — nothing to do.
+;;;
+;;; Principle: load-ordering dependencies should be visible contracts,
+;;; not emergent properties of the current code.  If the ordering
+;;; breaks, the system should tell you, not silently cope.
 
-(when (and *default-runtime* (null (runtime-worker *default-runtime*)))
-  (install-runtime-worker *default-runtime*))
+(cond
+  ((null *default-runtime*)
+   (warn "runtime-worker.lisp loaded before runtime.lisp: ~
+*DEFAULT-RUNTIME* is NIL.  The runtime-worker could not be ~
+installed.  Please reload the full :apis system to ensure ~
+correct load ordering."))
+  ((null (runtime-worker *default-runtime*))
+   (install-runtime-worker *default-runtime*))
+  ;; Already has a runtime-worker — normal reload, nothing to do.
+  (t nil))

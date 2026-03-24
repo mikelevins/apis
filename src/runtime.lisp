@@ -57,11 +57,19 @@ or NIL if not yet installed.")
             (runtime-thread-count rt)
             (if (runtime-running-p rt) "[running]" "[stopped]"))))
 
-(defun make-runtime (&key (thread-count *default-runtime-thread-count*))
-  "Create a new runtime.  If install-runtime-worker is available
-(runtime-worker.lisp has been loaded), automatically installs a
-runtime-worker in the new runtime."
-  (let ((rt (make-instance 'runtime :thread-count thread-count)))
+(defun make-runtime (&key (thread-count nil thread-count-supplied-p))
+  "Create a new runtime.  When THREAD-COUNT is not supplied, calls
+DEFAULT-THREAD-COUNT which queries the OS for logical CPU count and
+applies the heuristic (max 2 (floor (* N 3/4))), falling back to
+*DEFAULT-RUNTIME-THREAD-COUNT* if detection fails.  An explicit
+THREAD-COUNT always wins.
+
+If install-runtime-worker is available (runtime-worker.lisp has been
+loaded), automatically installs a runtime-worker in the new runtime."
+  (let* ((count (if thread-count-supplied-p
+                    thread-count
+                    (default-thread-count)))
+         (rt (make-instance 'runtime :thread-count count)))
     ;; install-runtime-worker is defined in runtime-worker.lisp which
     ;; loads after this file.  On initial load, fboundp is false and
     ;; the *default-runtime* created below gets no runtime-worker;
@@ -261,5 +269,10 @@ dead letter."))
 ;;; ---------------------------------------------------------------------
 ;;; default runtime
 ;;; ---------------------------------------------------------------------
+;;; The boot-time *default-runtime* uses *default-runtime-thread-count*
+;;; directly rather than (default-thread-count) so that the initial
+;;; thread count is deterministic and consistent with prior releases.
+;;; User code calling (make-runtime) without :thread-count gets the
+;;; auto-sizing behavior.
 
 (setf *default-runtime* (make-runtime :thread-count *default-runtime-thread-count*))

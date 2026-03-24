@@ -273,6 +273,18 @@
       (apis:stop-runtime rt)
       (setf apis:*default-runtime* old-runtime))))
 
+(define-test request-errors-without-runtime-worker
+  ;; Calling request on a runtime with no runtime-worker should signal
+  ;; a clear error, not a mysterious nil dereference.
+  (let* ((rt (make-instance 'apis:runtime :thread-count 2)))
+    ;; rt has no runtime-worker (we bypassed make-runtime)
+    (check (null (apis:runtime-worker rt))
+           "test setup: runtime should have no runtime-worker")
+    (check-condition error
+      (apis:request (apis:message :to (apis:makeid) :operation :ping)
+                    (lambda (m) (declare (ignore m)))
+                    :runtime rt))))
+
 ;;; =====================================================================
 ;;; deliver-remotely fills nil FROM from runtime-worker
 ;;; =====================================================================

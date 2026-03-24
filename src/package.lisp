@@ -48,6 +48,8 @@
    #:clear-all-queues
    #:*default-runtime*
    #:*default-runtime-thread-count*
+   #:hardware-thread-count
+   #:default-thread-count
 
    ;; Dead letters
    #:*dead-letters*
