@@ -216,13 +216,30 @@ connections, and join all threads.  Returns LISTENER."
     (dolist (tr connections)
       (handler-case (transport-close tr)
         (error () nil))))
-  ;; Join all threads (with a generous timeout via ignore-errors)
+  ;; Join all threads with a timeout.  On some platforms (notably
+  ;; Linux/SBCL), closing a socket from another thread does not
+  ;; reliably interrupt a blocked read or wait-for-input.  We try
+  ;; a timed join first, then destroy stubborn threads.
   (let ((threads (bt:with-lock-held ((listener-lock listener))
                    (copy-list (listener-threads listener)))))
     (dolist (thread threads)
       (when (and (bt:threadp thread) (bt:thread-alive-p thread))
-        (handler-case (bt:join-thread thread)
-          (error () nil)))))
+        ;; Give the thread a brief window to exit cleanly
+        (let ((joined nil))
+          (handler-case
+              (progn
+                ;; Poll for thread exit rather than blocking on join
+                (loop repeat 30  ; up to ~3 seconds
+                      while (bt:thread-alive-p thread)
+                      do (sleep 0.1))
+                (unless (bt:thread-alive-p thread)
+                  (bt:join-thread thread)
+                  (setf joined t)))
+            (error () nil))
+          ;; If the thread is still alive, destroy it
+          (when (and (not joined) (bt:thread-alive-p thread))
+            (handler-case (bt:destroy-thread thread)
+              (error () nil)))))))
   ;; Clear state
   (bt:with-lock-held ((listener-lock listener))
     (setf (listener-threads listener) nil)
@@ -233,21 +250,29 @@ connections, and join all threads.  Returns LISTENER."
 ;;; ---------------------------------------------------------------------
 ;;; Accept loop
 ;;; ---------------------------------------------------------------------
+;;; Portability note: usocket:wait-for-input with :ready-only t on
+;;; server sockets (stream-server-usocket) behaves inconsistently
+;;; across platforms — in particular on SBCL/Linux it can fail to
+;;; detect pending connections.  The portable approach is to pass a
+;;; LIST of sockets (not a bare socket), omit :ready-only, and check
+;;; the socket's state slot after the wait returns.
 
 (defun tcp-accept-loop (listener)
   "Accept incoming TCP connections and spawn a receive loop for each.
 Runs until the listener is stopped."
   (loop while (listener-running-p listener)
         do (handler-case
-               ;; Wait for a connection with a timeout so we can
-               ;; periodically check running-p
-               (let ((ready (usocket:wait-for-input
-                             (listener-listen-socket listener)
-                             :timeout 1 :ready-only t)))
-                 (when (and ready (listener-running-p listener))
+               (let ((sock (listener-listen-socket listener)))
+                 ;; Pass a list for portable behavior across backends.
+                 ;; Without :ready-only, wait-for-input always returns
+                 ;; the input list — readiness is indicated by the
+                 ;; socket's state slot being set to :READ.
+                 (usocket:wait-for-input (list sock) :timeout 0.5)
+                 (when (and (listener-running-p listener)
+                            (eql (usocket::state sock) :read))
                    (let* ((client-socket
                             (usocket:socket-accept
-                             (listener-listen-socket listener)
+                             sock
                              :element-type '(unsigned-byte 8)))
                           (client-stream
                             (usocket:socket-stream client-socket))
