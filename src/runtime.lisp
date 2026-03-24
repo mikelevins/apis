@@ -58,7 +58,19 @@ or NIL if not yet installed.")
             (if (runtime-running-p rt) "[running]" "[stopped]"))))
 
 (defun make-runtime (&key (thread-count *default-runtime-thread-count*))
-  (make-instance 'runtime :thread-count thread-count))
+  "Create a new runtime.  If install-runtime-worker is available
+(runtime-worker.lisp has been loaded), automatically installs a
+runtime-worker in the new runtime."
+  (let ((rt (make-instance 'runtime :thread-count thread-count)))
+    ;; install-runtime-worker is defined in runtime-worker.lisp which
+    ;; loads after this file.  On initial load, fboundp is false and
+    ;; the *default-runtime* created below gets no runtime-worker;
+    ;; the load-time form in runtime-worker.lisp patches it.  On all
+    ;; subsequent calls, fboundp is true and every runtime gets a
+    ;; runtime-worker automatically.
+    (when (fboundp 'install-runtime-worker)
+      (funcall 'install-runtime-worker rt))
+    rt))
 
 ;;; ---------------------------------------------------------------------
 ;;; registry operations

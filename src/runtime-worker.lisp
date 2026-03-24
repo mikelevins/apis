@@ -156,23 +156,29 @@ Returns the message ID (which will appear as CAUSE in the reply)."
 (defun install-runtime-worker (runtime)
   "Create a runtime-worker for RUNTIME, register it, and store it
 in the runtime's runtime-worker slot.  Returns the new runtime-worker.
-If the runtime already has a runtime-worker, replaces it."
+If the runtime already has a runtime-worker, replaces it.
+Binds *DEFAULT-RUNTIME* to RUNTIME during creation so that the
+worker's auto-registration :after method registers in the correct
+runtime rather than whatever *DEFAULT-RUNTIME* happens to be."
   (let ((old (runtime-worker runtime)))
     ;; Deregister old worker if present
     (when old
       (bt:with-lock-held ((runtime-registry-lock runtime))
         (remhash (worker-id old) (runtime-registry runtime)))))
-  (let ((rw (make-instance 'runtime-worker
-                           :runtime runtime
-                           :description "runtime-worker")))
-    ;; Register in the runtime's own registry
-    (bt:with-lock-held ((runtime-registry-lock runtime))
-      (setf (gethash (worker-id rw) (runtime-registry runtime)) rw))
+  ;; Bind *default-runtime* so the worker :after method on
+  ;; initialize-instance registers the runtime-worker in RUNTIME,
+  ;; not in whatever the current *default-runtime* happens to be.
+  (let* ((*default-runtime* runtime)
+         (rw (make-instance 'runtime-worker
+                            :runtime runtime
+                            :description "runtime-worker")))
+    ;; The worker :after method already registered rw in runtime's
+    ;; registry (via the *default-runtime* binding above).
     (setf (runtime-worker runtime) rw)
     rw))
 
 ;;; ---------------------------------------------------------------------
-;;; (setf runtime-worker): swap the runtime-worker
+;;; swap-runtime-worker
 ;;; ---------------------------------------------------------------------
 
 (defun swap-runtime-worker (runtime new-worker)
@@ -192,13 +198,14 @@ NEW-WORKER."
 ;;; ---------------------------------------------------------------------
 ;;; Auto-install on runtime creation
 ;;; ---------------------------------------------------------------------
-;;; This :after method runs for all runtimes created after this file
-;;; is loaded.  The *default-runtime* (created earlier, in runtime.lisp)
-;;; is handled below at load time.
+;;; Rather than an :after method on initialize-instance (which fires
+;;; during make-instance and causes the runtime-worker to register in
+;;; the wrong *default-runtime*), installation is done explicitly by
+;;; make-runtime via (fboundp 'install-runtime-worker).  See
+;;; runtime.lisp.
+;;;
+;;; The pre-existing *default-runtime* (created before this file loads)
+;;; is handled by the load-time form below.
 
-(defmethod initialize-instance :after ((runtime runtime) &key)
-  (install-runtime-worker runtime))
-
-;;; Ensure the pre-existing *default-runtime* gets a runtime-worker.
 (when (and *default-runtime* (null (runtime-worker *default-runtime*)))
   (install-runtime-worker *default-runtime*))
